@@ -21,6 +21,22 @@ myApp.controllers = {
 
       element.show && element.show(); // Fix ons-fab in Safari.
     });
+  },
+
+
+  // new task controller
+  addTask: function(page) {
+    const titre = page.getElementById("titre");
+    const description = page.getElementById("description");
+    const newTask = {
+      title: titre.value,
+      category: 'Programming',
+      description: description.value,
+      highlight: false,
+      urgent: false
+    };
+    myApp.services.fixtures.push(newTask);
+    myApp.services.tasks.create(newTask);
   }
 
 };

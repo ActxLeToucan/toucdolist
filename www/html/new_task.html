@@ -7,9 +7,23 @@
     <div class="right">
       <ons-if platform="android">
         <ons-toolbar-button component="button/save-task">
-          <ons-icon icon="md-save"></ons-icon>
+          <ons-icon onclick="myApp.controllers.addTask(document)" icon="md-save"></ons-icon>
         </ons-toolbar-button>
       </ons-if>
     </div>
   </ons-toolbar>
+  <div style="text-align: center; margin-top: 30px;">
+    <p>
+      <ons-input id="titre" modifier="underbar" placeholder="Titre" float></ons-input>
+    </p>
+    <p>
+      <ons-input id="description" modifier="underbar" type="password" placeholder="Description" float></ons-input>
+    </p>
+    <ons-if platform="ios">
+
+      <p style="margin-top: 30px;">
+        <ons-button onclick="myApp.controllers.addTask(document)">Ajouter</ons-button>
+      </p>
+    </ons-if>
+  </div>
 </ons-page>
