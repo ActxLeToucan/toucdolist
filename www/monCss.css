@@ -1,3 +1,12 @@
 .task-del {
     background-color: lightcoral !important;
 }
+
+.task-del > div > ons-icon, .task-del {
+    color: white !important;
+}
+
+.task-prio::before {
+    content: "❗";
+    padding-right: 0.5em;
+}

@@ -3,6 +3,7 @@
  ***********************************************************************/
 
 let lastDelClicked = null;
+let lastPrioClicked = null;
 
 myApp.controllers = {
 
@@ -47,7 +48,7 @@ myApp.controllers = {
   },
 
   createAlertDialog: function(event) {
-    lastDelClicked = event.target.parentNode.parentNode;
+    lastDelClicked = event.target.localName === "ons-icon" ? event.target.parentNode.parentNode : event.target.parentNode;
     lastDelClicked.classList.add("task-del");
 
     let dialog = document.getElementById('my-alert-dialog');
@@ -68,7 +69,11 @@ myApp.controllers = {
   },
 
   delete: function() {
-    myApp.services.tasks.deleteTask(lastDelClicked);
+    myApp.services.tasks.deleteTask(lastDelClicked.data);
     this.hideAlertDialog();
   },
+
+  changePriotity: function() {
+    myApp.services.tasks.changePriority(lastPrioClicked.data);
+  }
 };

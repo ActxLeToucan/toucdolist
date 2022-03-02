@@ -15,6 +15,8 @@ myApp.services = {
       myApp.services.fixtures.forEach(function (data) {
         myApp.services.tasks.create(data);
       });
+
+      console.log(myApp.services.fixtures)
     },
 
     // Creates a new task and attaches it to the pending task list.
@@ -22,33 +24,36 @@ myApp.services = {
       // Task item template.
       let taskItem = ons.createElement(
         //'<ons-list-item tappable category="' + myApp.services.categories.parseId(data.category)+ '">' +
-        '<ons-list-item tappable category="' + data.category + '">' +
-        '<label class="left">' +
-        '<ons-checkbox></ons-checkbox>' +
-        '</label>' +
-        '<div class="center">' +
-        data.title +
-        '</div>' +
-        '<div class="right">' +
-        '<ons-icon style="color: grey; padding-left: 4px" icon="ion-ios-trash-outline, material:md-delete"></ons-icon>' +
-        '</div>' +
-        '</ons-list-item>'
+        `<ons-list-item tappable category="${data.category}">
+          <label class="left">
+            <ons-checkbox></ons-checkbox>
+          </label>
+          <div class="center ${data.urgent ? "task-prio" : ""}">
+            ${data.title}
+          </div>
+          <div class="right">
+            <ons-icon style="color: grey; padding-left: 4px" icon="ion-ios-trash-outline, material:md-delete"></ons-icon>
+          </div>
+        </ons-list-item>`
       );
 
       // Store data within the element.
       taskItem.data = data;
 
-      taskItem.querySelector("ons-icon").addEventListener("click", myApp.controllers.createAlertDialog)
+      taskItem.querySelector(".right").addEventListener("click", myApp.controllers.createAlertDialog)
 
       // Insert urgent tasks at the top and non urgent tasks at the bottom.
       let pendingList = document.querySelector('#pending-list');
       pendingList.insertBefore(taskItem, taskItem.data.urgent ? pendingList.firstChild : null);
     },
 
-    deleteTask: (node) => {
-      let pendingList = document.querySelector('#pending-list');
-      let positionTask = Array.from(pendingList.children).indexOf(node);
-      myApp.services.fixtures.splice(positionTask, 1);
+    deleteTask: (data) => {
+      myApp.services.fixtures.splice(myApp.services.fixtures.indexOf(data), 1);
+      myApp.services.tasks.showPendingList();
+    },
+
+    changePriority: (data) => {
+      myApp.services.fixtures.find(task => task === data).urgent = !data.urgent;
       myApp.services.tasks.showPendingList();
     }
   },
@@ -69,14 +74,14 @@ myApp.services = {
       category: 'Programming',
       description: 'Some description.',
       highlight: false,
-      urgent: false
+      urgent: true
     },
     {
       title: 'Star Onsen UI repo on Github',
       category: 'Super important',
       description: 'Some description.',
       highlight: false,
-      urgent: false
+      urgent: true
     },
     {
       title: 'Register in the community forum',
