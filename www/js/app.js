@@ -2,7 +2,7 @@
 window.myApp = {};
 
 document.addEventListener('init', function(event) {
-  var page = event.target;
+  let page = event.target;
 
   // Each page calls its own initialization controller.
   if (myApp.controllers.hasOwnProperty(page.id)) {
@@ -16,9 +16,7 @@ document.addEventListener('init', function(event) {
       && document.querySelector('#pendingTasksPage')
       && !document.querySelector('#pendingTasksPage ons-list-item')
     ) {
-      myApp.services.fixtures.forEach(function (data) {
-        myApp.services.tasks.create(data);
-      });
+      myApp.services.tasks.showPendingList();
     }
   }
 });

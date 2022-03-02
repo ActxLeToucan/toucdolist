@@ -2,6 +2,8 @@
  * App Controllers. These controllers will be called on page initialization. *
  ***********************************************************************/
 
+let lastDelClicked = null;
+
 myApp.controllers = {
 
   //////////////////////////
@@ -26,17 +28,47 @@ myApp.controllers = {
 
   // new task controller
   addTask: function(page) {
-    const titre = page.getElementById("titre");
-    const description = page.getElementById("description");
+    const titre = page.getElementById("titre").value.trim();
+    const description = page.getElementById("description").value.trim();
+
+    if (titre === "") return;
+
     const newTask = {
-      title: titre.value,
+      title: titre,
       category: 'Programming',
-      description: description.value,
+      description: description,
       highlight: false,
       urgent: false
     };
     myApp.services.fixtures.push(newTask);
     myApp.services.tasks.create(newTask);
-  }
 
+    document.querySelector('ons-navigator').popPage();
+  },
+
+  createAlertDialog: function(event) {
+    lastDelClicked = event.target.parentNode.parentNode;
+    lastDelClicked.classList.add("task-del");
+
+    let dialog = document.getElementById('my-alert-dialog');
+
+    if (dialog) {
+      dialog.show();
+    } else {
+      ons.createElement('delete-task.html', { append: true })
+          .then(function(dialog) {
+            dialog.show();
+          });
+    }
+  },
+
+  hideAlertDialog: function() {
+    if (lastDelClicked) lastDelClicked.classList.remove("task-del");
+    document.getElementById('my-alert-dialog').hide();
+  },
+
+  delete: function() {
+    myApp.services.tasks.deleteTask(lastDelClicked);
+    this.hideAlertDialog();
+  },
 };

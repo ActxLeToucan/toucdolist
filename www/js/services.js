@@ -8,11 +8,19 @@ myApp.services = {
   // Task Service //
   /////////////////
   tasks: {
+    showPendingList: () => {
+      let pendingList = document.querySelector('#pending-list');
+      pendingList.innerHTML = "";
+
+      myApp.services.fixtures.forEach(function (data) {
+        myApp.services.tasks.create(data);
+      });
+    },
 
     // Creates a new task and attaches it to the pending task list.
     create: function (data) {
       // Task item template.
-      var taskItem = ons.createElement(
+      let taskItem = ons.createElement(
         //'<ons-list-item tappable category="' + myApp.services.categories.parseId(data.category)+ '">' +
         '<ons-list-item tappable category="' + data.category + '">' +
         '<label class="left">' +
@@ -30,11 +38,19 @@ myApp.services = {
       // Store data within the element.
       taskItem.data = data;
 
+      taskItem.querySelector("ons-icon").addEventListener("click", myApp.controllers.createAlertDialog)
+
       // Insert urgent tasks at the top and non urgent tasks at the bottom.
-      var pendingList = document.querySelector('#pending-list');
+      let pendingList = document.querySelector('#pending-list');
       pendingList.insertBefore(taskItem, taskItem.data.urgent ? pendingList.firstChild : null);
     },
 
+    deleteTask: (node) => {
+      let pendingList = document.querySelector('#pending-list');
+      let positionTask = Array.from(pendingList.children).indexOf(node);
+      myApp.services.fixtures.splice(positionTask, 1);
+      myApp.services.tasks.showPendingList();
+    }
   },
 
   ////////////////////////
