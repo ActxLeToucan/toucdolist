@@ -47,7 +47,7 @@ myApp.controllers = {
     document.querySelector('ons-navigator').popPage();
   },
 
-  createAlertDialog: function(event) {
+  createAlertDialog: function (event) {
     lastDelClicked = event.target.localName === "ons-icon" ? event.target.parentNode.parentNode : event.target.parentNode;
     lastDelClicked.classList.add("task-del");
 
@@ -57,23 +57,37 @@ myApp.controllers = {
       dialog.show();
     } else {
       ons.createElement('delete-task.html', { append: true })
-          .then(function(dialog) {
+          .then(function (dialog) {
             dialog.show();
           });
     }
   },
 
-  hideAlertDialog: function() {
+  hideAlertDialog: function () {
     if (lastDelClicked) lastDelClicked.classList.remove("task-del");
     document.getElementById('my-alert-dialog').hide();
   },
 
-  delete: function() {
+  delete: function () {
     myApp.services.tasks.deleteTask(lastDelClicked.data);
     this.hideAlertDialog();
   },
 
-  changePriotity: function() {
+  changePriotity: function () {
     myApp.services.tasks.changePriority(lastPrioClicked.data);
+  },
+
+  changeState: function (event) {
+    let task = event.target.parentNode.parentNode.parentNode;
+
+    if (event.target.checked) {
+      myApp.services.tasks.setState(task.data, true);
+      myApp.services.tasks.showPendingList();
+      myApp.services.tasks.showCompletedList();
+    } else {
+      myApp.services.tasks.setState(task.data, false);
+      myApp.services.tasks.showPendingList();
+      myApp.services.tasks.showCompletedList();
+    }
   }
 };
