@@ -5,6 +5,10 @@
 let lastDelClicked = null;
 let lastPrioClicked = null;
 
+function waitForMs(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 myApp.controllers = {
 
   //////////////////////////
@@ -68,23 +72,29 @@ myApp.controllers = {
     document.getElementById('my-alert-dialog').hide();
   },
 
-  delete: function () {
-    myApp.services.tasks.deleteTask(lastDelClicked.data);
+  delete: async function () {
+    lastDelClicked.classList.add("animation-remove");
     this.hideAlertDialog();
+    await waitForMs(750);
+    myApp.services.tasks.deleteTask(lastDelClicked.data, lastDelClicked.querySelector("ons-checkbox").checked);
   },
 
   changePriotity: function () {
     myApp.services.tasks.changePriority(lastPrioClicked.data);
   },
 
-  changeState: function (event) {
+  changeState: async function (event) {
     let task = event.target.parentNode.parentNode.parentNode;
 
     if (event.target.checked) {
+      task.classList.add("animation-swipe-right");
+      await waitForMs(950);
       myApp.services.tasks.setState(task.data, true);
       myApp.services.tasks.showPendingList();
       myApp.services.tasks.showCompletedList();
     } else {
+      task.classList.add("animation-swipe-left");
+      await waitForMs(950);
       myApp.services.tasks.setState(task.data, false);
       myApp.services.tasks.showPendingList();
       myApp.services.tasks.showCompletedList();

@@ -8,6 +8,11 @@ myApp.services = {
   // Task Service //
   /////////////////
   tasks: {
+    showLists: () => {
+      myApp.services.tasks.showPendingList();
+      myApp.services.tasks.showCompletedList();
+    },
+
     showPendingList: () => {
       let pendingList = document.querySelector('#pending-list');
       pendingList.innerHTML = "";
@@ -34,7 +39,7 @@ myApp.services = {
       // Task item template.
       let taskItem = ons.createElement(
         //'<ons-list-item tappable category="' + myApp.services.categories.parseId(data.category)+ '">' +
-        `<ons-list-item tappable category="${data.category}">
+        `<ons-list-item tappable category="${data.category}" class="${data.highlight ? "highlight" : ""}">
           <label class="left">
             <ons-checkbox ${taskCompleted ? "checked" : ""}></ons-checkbox>
           </label>
@@ -59,9 +64,10 @@ myApp.services = {
       list.insertBefore(taskItem, taskItem.data.urgent ? list.firstChild : null);
     },
 
-    deleteTask: (data) => {
-      myApp.services.fixtures.splice(myApp.services.fixtures.indexOf(data), 1);
-      myApp.services.tasks.showPendingList();
+    deleteTask: (data, taskCompleted) => {
+      let tab = (taskCompleted ? myApp.services.completedTasks : myApp.services.fixtures);
+      tab.splice(tab.indexOf(data), 1);
+      myApp.services.tasks.showLists();
     },
 
     changePriority: (data) => {
@@ -70,13 +76,11 @@ myApp.services = {
     },
 
     setState: (data, taskCompleted) => {
-      if (taskCompleted) {
-        myApp.services.completedTasks.push(data);
-        myApp.services.fixtures.splice(myApp.services.fixtures.indexOf(data), 1);
-      } else {
-        myApp.services.fixtures.push(data);
-        myApp.services.completedTasks.splice(myApp.services.completedTasks.indexOf(data), 1);
-      }
+      let tab1 = (taskCompleted ? myApp.services.completedTasks : myApp.services.fixtures);
+      let tab2 = (!taskCompleted ? myApp.services.completedTasks : myApp.services.fixtures);
+
+      tab1.push(data);
+      tab2.splice(tab2.indexOf(data), 1);
     }
   },
 
@@ -88,14 +92,14 @@ myApp.services = {
       title: 'Download OnsenUI',
       category: 'Programming',
       description: 'Some description.',
-      highlight: false,
+      highlight: true,
       urgent: false
     },
     {
       title: 'Install Monaca CLI',
       category: 'Programming',
       description: 'Some description.',
-      highlight: false,
+      highlight: true,
       urgent: true
     },
     {
