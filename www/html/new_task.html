@@ -19,8 +19,16 @@
     <p>
       <ons-input id="description" modifier="underbar" placeholder="Description" float></ons-input>
     </p>
+    <p>
+      <ons-input id="categorie" modifier="underbar" placeholder="Catégorie" float></ons-input>
+    </p>
+    <p>
+      <ons-checkbox input-id="highlight" class="highlight-checkbox"></ons-checkbox><label for="highlight"> Mettre en évidence</label>
+    </p>
+    <p>
+      <ons-checkbox input-id="urgent" class="urgent-checkbox"></ons-checkbox><label for="urgent"> Définir comme urgent</label>
+    </p>
     <ons-if platform="ios other">
-
       <p style="margin-top: 30px;">
         <ons-button onclick="myApp.controllers.addTask(document)">Ajouter</ons-button>
       </p>

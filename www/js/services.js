@@ -8,11 +8,6 @@ myApp.services = {
   // Task Service //
   /////////////////
   tasks: {
-    showLists: () => {
-      myApp.services.tasks.showPendingList();
-      myApp.services.tasks.showCompletedList();
-    },
-
     showPendingList: () => {
       let pendingList = document.querySelector('#pending-list');
       pendingList.innerHTML = "";
@@ -20,9 +15,6 @@ myApp.services = {
       myApp.services.fixtures.forEach(function (data) {
         myApp.services.tasks.create(data, false);
       });
-
-      console.log(myApp.services.fixtures);
-      console.log(myApp.services.completedTasks);
     },
 
     showCompletedList: () => {
@@ -32,6 +24,26 @@ myApp.services = {
       myApp.services.completedTasks.forEach(function (data) {
         myApp.services.tasks.create(data, true);
       });
+    },
+
+    showTask: (task) => {
+      let page = document.querySelector('#details-task-page-content');
+      page.innerHTML = `
+        <h1>${task.title}</h1>
+        <p>Description : ${task.description}</p>
+        <p>Catégorie : ${task.category}</p>
+        <p>
+          <ons-checkbox input-id="highlight" class="highlight-checkbox" ${task.highlight ? "checked" : ""}></ons-checkbox><label for="highlight"> Mettre en évidence</label>
+        </p>
+        <p>
+          <ons-checkbox input-id="urgent" class="urgent-checkbox" ${task.urgent ? "checked" : ""}></ons-checkbox><label for="urgent"> Définir comme urgent</label>
+        </p>
+      `;
+
+      page.data = task;
+
+      page.querySelector(".highlight-checkbox").addEventListener("change", myApp.controllers.changeHighlight);
+      page.querySelector(".urgent-checkbox").addEventListener("change", myApp.controllers.changePriotity);
     },
 
     // Creates a new task and attaches it to the pending task list.
@@ -57,22 +69,24 @@ myApp.services = {
 
       taskItem.querySelector(".right").addEventListener("click", myApp.controllers.createAlertDialog);
       taskItem.querySelector("ons-checkbox").addEventListener("change", myApp.controllers.changeState);
+      taskItem.querySelector(".center").addEventListener("click", myApp.controllers.showTask);
 
       // Insert urgent tasks at the top and non urgent tasks at the bottom.
       let list = (taskCompleted ? document.querySelector('#completed-list') : document.querySelector('#pending-list'));
-      console.log(list);
       list.insertBefore(taskItem, taskItem.data.urgent ? list.firstChild : null);
     },
 
     deleteTask: (data, taskCompleted) => {
       let tab = (taskCompleted ? myApp.services.completedTasks : myApp.services.fixtures);
       tab.splice(tab.indexOf(data), 1);
-      myApp.services.tasks.showLists();
     },
 
     changePriority: (data) => {
       myApp.services.fixtures.find(task => task === data).urgent = !data.urgent;
-      myApp.services.tasks.showPendingList();
+    },
+
+    changeHighlight: (data) => {
+      myApp.services.fixtures.find(task => task === data).highlight = !data.highlight;
     },
 
     setState: (data, taskCompleted) => {

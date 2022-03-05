@@ -66,9 +66,9 @@
 
             <!-- Auto-positioned Tabbar: top on Android, bottom on iOS/other. -->
             <ons-tabbar id="myTabbar" position="auto">
-                <ons-tab page="html/pending_tasks.html" label="En attente" active>
+                <ons-tab page="html/pending_tasks.html" label="En attente" active onclick="myApp.controllers.updateAffichage()">
                 </ons-tab>
-                <ons-tab page="html/completed_tasks.html" label="Finies">
+                <ons-tab page="html/completed_tasks.html" label="Finies" onclick="myApp.controllers.updateAffichage()">
                 </ons-tab>
             </ons-tabbar>
         </ons-page>

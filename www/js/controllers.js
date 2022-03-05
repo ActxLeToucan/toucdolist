@@ -5,10 +5,6 @@
 let lastDelClicked = null;
 let lastPrioClicked = null;
 
-function waitForMs(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
 myApp.controllers = {
 
   //////////////////////////
@@ -30,23 +26,30 @@ myApp.controllers = {
     });
   },
 
+  updateAffichage: () => {
+    myApp.services.tasks.showPendingList();
+    myApp.services.tasks.showCompletedList();
+  },
 
   // new task controller
-  addTask: function(page) {
+  addTask: function (page) {
     const titre = page.getElementById("titre").value.trim();
     const description = page.getElementById("description").value.trim();
+    const categorie = page.getElementById("categorie").value.trim();
+    const highlight = page.querySelector('.highlight-checkbox').checked;
+    const urgent = page.querySelector('.urgent-checkbox').checked;
 
     if (titre === "") return;
 
     const newTask = {
       title: titre,
-      category: 'Programming',
+      category: categorie,
       description: description,
-      highlight: false,
-      urgent: false
+      highlight: highlight,
+      urgent: urgent
     };
     myApp.services.fixtures.push(newTask);
-    myApp.services.tasks.create(newTask);
+    myApp.controllers.updateAffichage();
 
     document.querySelector('ons-navigator').popPage();
   },
@@ -59,10 +62,12 @@ myApp.controllers = {
 
     if (dialog) {
       dialog.show();
+      dialog.childNodes[0].addEventListener("click", myApp.controllers.hideAlertDialog);
     } else {
       ons.createElement('delete-task.html', { append: true })
           .then(function (dialog) {
             dialog.show();
+            dialog.childNodes[0].addEventListener("click", myApp.controllers.hideAlertDialog);
           });
     }
   },
@@ -72,32 +77,38 @@ myApp.controllers = {
     document.getElementById('my-alert-dialog').hide();
   },
 
-  delete: async function () {
+  delete: function () {
     lastDelClicked.classList.add("animation-remove");
     this.hideAlertDialog();
-    await waitForMs(750);
     myApp.services.tasks.deleteTask(lastDelClicked.data, lastDelClicked.querySelector("ons-checkbox").checked);
   },
 
-  changePriotity: function () {
-    myApp.services.tasks.changePriority(lastPrioClicked.data);
+  changePriotity: function (event) {
+    myApp.services.tasks.changePriority(event.target.parentNode.parentNode.parentNode.data);
+    myApp.controllers.updateAffichage();
   },
 
-  changeState: async function (event) {
+  changeHighlight: (event) => {
+    myApp.services.tasks.changeHighlight(event.target.parentNode.parentNode.parentNode.data);
+    myApp.controllers.updateAffichage();
+  },
+
+  changeState: function (event) {
     let task = event.target.parentNode.parentNode.parentNode;
 
     if (event.target.checked) {
       task.classList.add("animation-swipe-right");
-      await waitForMs(950);
       myApp.services.tasks.setState(task.data, true);
-      myApp.services.tasks.showPendingList();
-      myApp.services.tasks.showCompletedList();
     } else {
       task.classList.add("animation-swipe-left");
-      await waitForMs(950);
       myApp.services.tasks.setState(task.data, false);
-      myApp.services.tasks.showPendingList();
-      myApp.services.tasks.showCompletedList();
     }
+  },
+
+  showTask: (event) => {
+    let task = event.target.parentNode;
+    document.querySelector('ons-navigator').pushPage('html/details_task.html').then(() =>
+      myApp.services.tasks.showTask(task.data)
+    );
   }
 };
