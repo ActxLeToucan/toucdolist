@@ -10,3 +10,7 @@
     content: "❗";
     padding-right: 0.5em;
 }
+
+.edit-task-field {
+    display: none;
+}

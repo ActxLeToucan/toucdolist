@@ -29,18 +29,102 @@ myApp.services = {
     showTask: (task) => {
       let page = document.querySelector('#details-task-page-content');
       page.innerHTML = `
-        <h1>${task.title}</h1>
-        <p>Description : ${task.description}</p>
-        <p>Catégorie : ${task.category}</p>
+        <h1 id="title">
+            <div id="title-show" class="show-task-field">
+                <span id="title-content">${task.title}</span>
+                <ons-button modifier="quiet" id="button-edit-title">Editer ✏️</ons-button>
+            </div>
+            <div id="title-edit" class="edit-task-field">
+                <ons-input id="title" modifier="underbar" placeholder="Titre" float></ons-input>
+                <ons-button modifier="quiet" id="button-validate-title">Valider ✅</ons-button>
+            </div>
+        </h1>
+        <div id="descr">
+            <div id="descr-show" class="show-task-field">
+                <span id="descr-title">Description</span>
+                <ons-button modifier="quiet" id="button-edit-descr">Editer ✏️</ons-button>
+                <br />
+                <span id="descr-content">${task.description}</span>
+            </div>
+            <div id="descr-edit" class="edit-task-field">
+                <ons-input id="descr" modifier="underbar" placeholder="Description" float></ons-input>
+                <ons-button modifier="quiet" id="button-validate-descr">Valider ✅</ons-button>
+            </div>
+        </div>
+        <div id="categ">
+            <div id="categ-show" class="show-task-field">
+                <span id="categ-title">Catégorie</span>
+                <ons-button modifier="quiet" id="button-edit-categ">Editer ✏️</ons-button>
+                <br />
+                <span id="categ-content">${task.category}</span>
+            </div>
+            <div id="categ-edit" class="edit-task-field">
+                <ons-input id="categ" modifier="underbar" placeholder="Catégorie" float></ons-input>
+                <ons-button modifier="quiet" id="button-validate-categ">Valider ✅</ons-button>
+            </div>
+        </div>
         <p>
-          <ons-checkbox input-id="highlight" class="highlight-checkbox" ${task.highlight ? "checked" : ""}></ons-checkbox><label for="highlight"> Mettre en évidence</label>
+            <ons-switch input-id="highlight" class="highlight-checkbox" ${task.highlight ? "checked" : ""}></ons-switch><label for="highlight"> Mettre en évidence</label>
         </p>
         <p>
-          <ons-checkbox input-id="urgent" class="urgent-checkbox" ${task.urgent ? "checked" : ""}></ons-checkbox><label for="urgent"> Définir comme urgent</label>
+            <ons-switch input-id="urgent" class="urgent-checkbox" ${task.urgent ? "checked" : ""}></ons-switch><label for="urgent"> Définir comme urgent</label>
         </p>
       `;
 
       page.data = task;
+
+      // modification du titre
+      page.querySelector("#button-edit-title").addEventListener("click", (e) => {
+        let affichage = e.target.parentNode;
+        affichage.style.display = "none";
+        let edition = e.target.parentNode.parentNode.querySelector(".edit-task-field");
+        edition.style.display = "block";
+        edition.querySelector("ons-input").value = affichage.querySelector("#title-content").innerText;
+      });
+      page.querySelector("#button-validate-title").addEventListener("click", (e) => {
+        let edition = e.target.parentNode;
+        edition.style.display = "none";
+        let affichage = e.target.parentNode.parentNode.querySelector(".show-task-field");
+        affichage.style.display = "block";
+        let newValue = edition.querySelector("ons-input").value;
+        affichage.querySelector("#title-content").innerText = newValue;
+        myApp.controllers.changeTitle(e, newValue);
+      });
+      // modification de la description
+      page.querySelector("#button-edit-descr").addEventListener("click", (e) => {
+        let affichage = e.target.parentNode;
+        affichage.style.display = "none";
+        let edition = e.target.parentNode.parentNode.querySelector(".edit-task-field");
+        edition.style.display = "block";
+        edition.querySelector("ons-input").value = affichage.querySelector("#descr-content").innerText;
+      });
+      page.querySelector("#button-validate-descr").addEventListener("click", (e) => {
+        let edition = e.target.parentNode;
+        edition.style.display = "none";
+        let affichage = e.target.parentNode.parentNode.querySelector(".show-task-field");
+        affichage.style.display = "block";
+        let newValue = edition.querySelector("ons-input").value;
+        affichage.querySelector("#descr-content").innerText = newValue;
+        myApp.controllers.changeDescription(e, newValue);
+      });
+      // modification de la catégorie
+      page.querySelector("#button-edit-categ").addEventListener("click", (e) => {
+        let affichage = e.target.parentNode;
+        affichage.style.display = "none";
+        let edition = e.target.parentNode.parentNode.querySelector(".edit-task-field");
+        edition.style.display = "block";
+        edition.querySelector("ons-input").value = affichage.querySelector("#categ-content").innerText;
+      });
+      page.querySelector("#button-validate-categ").addEventListener("click", (e) => {
+        let edition = e.target.parentNode;
+        edition.style.display = "none";
+        let affichage = e.target.parentNode.parentNode.querySelector(".show-task-field");
+        affichage.style.display = "block";
+        let newValue = edition.querySelector("ons-input").value;
+        affichage.querySelector("#categ-content").innerText = newValue;
+        myApp.controllers.changeCategory(e, newValue);
+      });
+
 
       page.querySelector(".highlight-checkbox").addEventListener("change", myApp.controllers.changeHighlight);
       page.querySelector(".urgent-checkbox").addEventListener("change", myApp.controllers.changePriotity);
@@ -87,6 +171,18 @@ myApp.services = {
 
     changeHighlight: (data) => {
       myApp.services.fixtures.find(task => task === data).highlight = !data.highlight;
+    },
+
+    changeTitle: (data, newTitle) => {
+      myApp.services.fixtures.find(task => task === data).title = newTitle;
+    },
+
+    changeDescription: (data, newDescription) => {
+      myApp.services.fixtures.find(task => task === data).description = newDescription;
+    },
+
+    changeCategory: (data, newCateg) => {
+      myApp.services.fixtures.find(task => task === data).category = newCateg;
     },
 
     setState: (data, taskCompleted) => {

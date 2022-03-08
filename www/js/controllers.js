@@ -3,7 +3,6 @@
  ***********************************************************************/
 
 let lastDelClicked = null;
-let lastPrioClicked = null;
 
 myApp.controllers = {
 
@@ -84,12 +83,12 @@ myApp.controllers = {
   },
 
   changePriotity: function (event) {
-    myApp.services.tasks.changePriority(event.target.parentNode.parentNode.parentNode.data);
+    myApp.services.tasks.changePriority(event.target.parentNode.parentNode.data);
     myApp.controllers.updateAffichage();
   },
 
   changeHighlight: (event) => {
-    myApp.services.tasks.changeHighlight(event.target.parentNode.parentNode.parentNode.data);
+    myApp.services.tasks.changeHighlight(event.target.parentNode.parentNode.data);
     myApp.controllers.updateAffichage();
   },
 
@@ -103,6 +102,21 @@ myApp.controllers = {
       task.classList.add("animation-swipe-left");
       myApp.services.tasks.setState(task.data, false);
     }
+  },
+
+  changeTitle: (event, newValue) => {
+    myApp.services.tasks.changeTitle(event.target.parentNode.parentNode.parentNode.data, newValue);
+    myApp.controllers.updateAffichage();
+  },
+
+  changeDescription: (event, newValue) => {
+    myApp.services.tasks.changeDescription(event.target.parentNode.parentNode.parentNode.data, newValue);
+    myApp.controllers.updateAffichage();
+  },
+
+  changeCategory: (event, newValue) => {
+    myApp.services.tasks.changeCategory(event.target.parentNode.parentNode.parentNode.data, newValue);
+    myApp.controllers.updateAffichage();
   },
 
   showTask: (event) => {
