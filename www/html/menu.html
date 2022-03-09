@@ -3,19 +3,19 @@
   <ons-list-title>Par défaut</ons-list-title>
     <ons-list id="default-category-list"><ons-list-item tappable>
       <div class="left">
-        <ons-radio name="categoryGroup" input-id="r-all"></ons-radio>
+        <ons-radio name="categoryGroup" input-id="r-today"></ons-radio>
       </div>
       <label class="center" for="r-today">🌞 Ma journée</label>
     </ons-list-item>
     <ons-list-item tappable>
       <div class="left">
-        <ons-radio name="categoryGroup" input-id="r-all"></ons-radio>
+        <ons-radio name="categoryGroup" input-id="r-urgent"></ons-radio>
       </div>
       <label class="center" for="r-urgent">❗ Important</label>
     </ons-list-item>
     <ons-list-item tappable>
       <div class="left">
-        <ons-radio name="categoryGroup" input-id="r-all"></ons-radio>
+        <ons-radio name="categoryGroup" input-id="r-planned"></ons-radio>
       </div>
       <label class="center" for="r-planned">📅 Planifié</label>
     </ons-list-item>
@@ -35,6 +35,9 @@
 
   <ons-list-title>Catégories</ons-list-title>
   <ons-list id="custom-category-list">
+    <ons-list-item>
+      <ons-button id="button-new-categ" onclick="myApp.controllers.createAlertDialogNewCateg()">Nouvelle catégorie</ons-button>
+    </ons-list-item>
   </ons-list>
 
   <ons-list-title>Par Antoine CONTOUX</ons-list-title>

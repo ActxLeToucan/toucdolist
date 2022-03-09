@@ -34,6 +34,7 @@ myApp.controllers = {
   updateAffichage: () => {
     myApp.services.tasks.showPendingList();
     myApp.services.tasks.showCompletedList();
+    myApp.services.tasks.showCategs();
   },
 
   // new task controller
@@ -61,32 +62,32 @@ myApp.controllers = {
     document.querySelector('ons-navigator').popPage();
   },
 
-  createAlertDialog: function (event) {
+  createAlertDialogDeleteTask: function (event) {
     lastDelClicked = event.target.localName === "ons-icon" ? event.target.parentNode.parentNode : event.target.parentNode;
     lastDelClicked.classList.add("task-del");
 
-    let dialog = document.getElementById('my-alert-dialog');
+    let dialog = document.getElementById('alert-dialog-delete-task');
 
     if (dialog) {
       dialog.show();
-      dialog.childNodes[0].addEventListener("click", myApp.controllers.hideAlertDialog);
+      dialog.childNodes[0].addEventListener("click", myApp.controllers.hideAlertDialogDeleteTask);
     } else {
       ons.createElement('delete-task.html', { append: true })
           .then(function (dialog) {
             dialog.show();
-            dialog.childNodes[0].addEventListener("click", myApp.controllers.hideAlertDialog);
+            dialog.childNodes[0].addEventListener("click", myApp.controllers.hideAlertDialogDeleteTask);
           });
     }
   },
 
-  hideAlertDialog: function () {
+  hideAlertDialogDeleteTask: function () {
     if (lastDelClicked) lastDelClicked.classList.remove("task-del");
-    document.getElementById('my-alert-dialog').hide();
+    document.getElementById('alert-dialog-delete-task').hide();
   },
 
-  delete: function () {
+  deleteTask: function () {
     lastDelClicked.classList.add("animation-remove");
-    this.hideAlertDialog();
+    myApp.controllers.hideAlertDialogDeleteTask();
     myApp.services.tasks.deleteTask(lastDelClicked.data, lastDelClicked.querySelector("ons-checkbox").checked);
   },
 
@@ -137,5 +138,47 @@ myApp.controllers = {
     document.querySelector('ons-navigator').pushPage('html/details_task.html').then(() =>
       myApp.services.tasks.showTask(task.data)
     );
+  },
+
+  createAlertDialogNewCateg: () => {
+    let dialog = document.getElementById('alert-dialog-new-categ');
+
+    if (dialog) {
+      dialog.show();
+      dialog.childNodes[0].addEventListener("click", myApp.controllers.hideAlertDialogNewCateg);
+      dialog.querySelector('#button-cancel-categ').addEventListener('click', myApp.controllers.hideAlertDialogNewCateg);
+      dialog.querySelector('#button-alert-new-categ').addEventListener('click', myApp.controllers.createCateg);
+    } else {
+      ons.createElement('new-categ.html', { append: true })
+          .then(function (dialog) {
+            dialog.show();
+            dialog.childNodes[0].addEventListener("click", myApp.controllers.hideAlertDialogNewCateg);
+            dialog.querySelector('#button-cancel-categ').addEventListener('click', myApp.controllers.hideAlertDialogNewCateg);
+            dialog.querySelector('#button-alert-new-categ').addEventListener('click', myApp.controllers.createCateg);
+          });
+    }
+  },
+
+  hideAlertDialogNewCateg: (event) => {
+    document.getElementById('alert-dialog-new-categ').hide();
+    let input = event.target.parentNode.parentNode.querySelector('#input-new-categ');
+    let res = event.target.parentNode.parentNode.querySelector('.res-button');
+    input.value = "";
+    res.innerText = "";
+  },
+
+  createCateg: (event) => {
+    let input = event.target.parentNode.parentNode.querySelector('#input-new-categ');
+    let res = event.target.parentNode.parentNode.querySelector('.res-button');
+    let name = input.value;
+
+    if (name && !myApp.services.tasks.categoryExist(name)) {
+      myApp.controllers.hideAlertDialogNewCateg(event);
+      myApp.services.tasks.addCateg(name);
+      myApp.services.tasks.showCategs();
+    } else {
+      res.innerText = "Nom de catégorie invalide.";
+    }
+    console.log(myApp.services.categories);
   }
 };

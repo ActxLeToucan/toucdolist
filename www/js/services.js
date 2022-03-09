@@ -19,7 +19,7 @@ myApp.services = {
       pendingList.innerHTML = "";
 
       myApp.services.fixtures.forEach(function (data) {
-        myApp.services.tasks.create(data, false);
+        myApp.services.tasks.createTask(data, false);
       });
     },
 
@@ -28,7 +28,7 @@ myApp.services = {
       completedTasksPage.innerHTML = "";
 
       myApp.services.completedTasks.forEach(function (data) {
-        myApp.services.tasks.create(data, true);
+        myApp.services.tasks.createTask(data, true);
       });
     },
 
@@ -149,7 +149,7 @@ myApp.services = {
     },
 
     // Creates a new task and attaches it to the pending task list.
-    create: function (data, taskCompleted) {
+    createTask: function (data, taskCompleted) {
       // Task item template.
       let taskItem = ons.createElement(
         //'<ons-list-item tappable category="' + myApp.services.categories.parseId(data.category)+ '">' +
@@ -169,7 +169,7 @@ myApp.services = {
       // Store data within the element.
       taskItem.data = data;
 
-      taskItem.querySelector(".right").addEventListener("click", myApp.controllers.createAlertDialog);
+      taskItem.querySelector(".right").addEventListener("click", myApp.controllers.createAlertDialogDeleteTask);
       taskItem.querySelector("ons-checkbox").addEventListener("change", myApp.controllers.changeState);
       taskItem.querySelector(".center").addEventListener("click", myApp.controllers.showTask);
 
@@ -214,6 +214,49 @@ myApp.services = {
 
       tab1.push(data);
       tab2.splice(tab2.indexOf(data), 1);
+    },
+
+    categoryExist: (name) => {
+      let existeDeja = false;
+      myApp.services.categories.forEach(categ => {
+        if (categ.name === name) existeDeja = true;
+      });
+      return existeDeja;
+    },
+
+    addCateg: (name) => {
+      myApp.services.categories.push({
+        'name': name,
+        'children': []
+      });
+    },
+
+    createCateg: (data) => {
+      let categ = ons.createElement(`
+        <ons-list-item tappable category-id="${data.name}">
+          <div class="left">
+            <ons-radio name="categoryGroup" input-id="r-${data.name}"></ons-radio>
+          </div>
+          <label class="center" for="r-${data.name}">${data.name}</label>
+        </ons-list-item>
+      `);
+
+      categ.data = data;
+
+      let list = document.querySelector('#custom-category-list');
+      list.insertBefore(categ, list.firstChild);
+    },
+
+    showCategs: () => {
+      let categs = document.querySelector('#custom-category-list');
+      categs.innerHTML = `
+          <ons-list-item>
+            <ons-button id="button-new-categ" onclick="myApp.controllers.createAlertDialogNewCateg()">Nouvelle catégorie</ons-button>
+          </ons-list-item>`;
+
+      myApp.services.categories.forEach(categ => {
+        myApp.services.tasks.createCateg(categ);
+      });
     }
   },
 
@@ -286,6 +329,13 @@ myApp.services = {
       description: 'Some description.',
       highlight: false,
       urgent: false
+    }
+  ],
+
+  categories: [
+    {
+      name: 'Programming',
+      children: []
     }
   ]
 };
