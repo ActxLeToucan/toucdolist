@@ -1,7 +1,24 @@
 <ons-page id="menuPage">
 
   <ons-list-title>Par défaut</ons-list-title>
-  <ons-list id="default-category-list">
+    <ons-list id="default-category-list"><ons-list-item tappable>
+      <div class="left">
+        <ons-radio name="categoryGroup" input-id="r-all"></ons-radio>
+      </div>
+      <label class="center" for="r-today">🌞 Ma journée</label>
+    </ons-list-item>
+    <ons-list-item tappable>
+      <div class="left">
+        <ons-radio name="categoryGroup" input-id="r-all"></ons-radio>
+      </div>
+      <label class="center" for="r-urgent">❗ Important</label>
+    </ons-list-item>
+    <ons-list-item tappable>
+      <div class="left">
+        <ons-radio name="categoryGroup" input-id="r-all"></ons-radio>
+      </div>
+      <label class="center" for="r-planned">📅 Planifié</label>
+    </ons-list-item>
     <ons-list-item tappable>
       <div class="left">
         <ons-radio name="categoryGroup" input-id="r-all" checked></ons-radio>

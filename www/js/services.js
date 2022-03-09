@@ -2,6 +2,12 @@
  * App Services. This contains the logic of the application organised in modules/objects. *
  ***********************************************************************************/
 
+/**
+ * SERVICES
+ * Gère les tâches dans les tableaux et peut générer les affichages à partir de ces derniers.
+ * Seul le contrôleur doit appeler les méthodes de services. Donc lors d'un évènement, l'action est déclenchée dans le contrôleur.
+ */
+
 myApp.services = {
 
   /////////////////
@@ -69,7 +75,13 @@ myApp.services = {
         <p>
             <ons-switch input-id="urgent" class="urgent-checkbox" ${task.urgent ? "checked" : ""}></ons-switch><label for="urgent"> Définir comme urgent</label>
         </p>
+        <p>
+            </ons-input><label for="echeancve">Échéance</label>
+            <ons-input input-id="echeance" class="echeance" type="date" modifier="underbar">
+        </p>
       `;
+      page.querySelector(".echeance").value = task.echeance;
+
 
       page.data = task;
 
@@ -124,10 +136,16 @@ myApp.services = {
         affichage.querySelector("#categ-content").innerText = newValue;
         myApp.controllers.changeCategory(e, newValue);
       });
-
-
+      // modification surlignage
       page.querySelector(".highlight-checkbox").addEventListener("change", myApp.controllers.changeHighlight);
+      // modification urgence
       page.querySelector(".urgent-checkbox").addEventListener("change", myApp.controllers.changePriotity);
+      // modification echeance
+      page.querySelector(".echeance").addEventListener("change", myApp.controllers.changeEcheance);
+    },
+
+    addTask: (data) => {
+      myApp.services.fixtures.push(data);
     },
 
     // Creates a new task and attaches it to the pending task list.
@@ -183,6 +201,11 @@ myApp.services = {
 
     changeCategory: (data, newCateg) => {
       myApp.services.fixtures.find(task => task === data).category = newCateg;
+    },
+
+    changeEcheance: (data, newEcheance) => {
+      console.log(newEcheance)
+      myApp.services.fixtures.find(task => task === data).echeance = newEcheance;
     },
 
     setState: (data, taskCompleted) => {

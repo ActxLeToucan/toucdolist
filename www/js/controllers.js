@@ -2,6 +2,12 @@
  * App Controllers. These controllers will be called on page initialization. *
  ***********************************************************************/
 
+/**
+ * CONTROLLERS
+ * Le contrôleur ne doit pas agir directement sur les tâches des tableaux. Il doit appeler les méthodes de services.
+ */
+
+
 let lastDelClicked = null;
 
 myApp.controllers = {
@@ -37,6 +43,7 @@ myApp.controllers = {
     const categorie = page.getElementById("categorie").value.trim();
     const highlight = page.querySelector('.highlight-checkbox').checked;
     const urgent = page.querySelector('.urgent-checkbox').checked;
+    const echeance = page.querySelector('.echeance').value;
 
     if (titre === "") return;
 
@@ -45,9 +52,10 @@ myApp.controllers = {
       category: categorie,
       description: description,
       highlight: highlight,
-      urgent: urgent
+      urgent: urgent,
+      echeance: echeance
     };
-    myApp.services.fixtures.push(newTask);
+    myApp.services.tasks.addTask(newTask)
     myApp.controllers.updateAffichage();
 
     document.querySelector('ons-navigator').popPage();
@@ -117,6 +125,11 @@ myApp.controllers = {
   changeCategory: (event, newValue) => {
     myApp.services.tasks.changeCategory(event.target.parentNode.parentNode.parentNode.data, newValue);
     myApp.controllers.updateAffichage();
+  },
+
+  changeEcheance: (event) => {
+    console.log(event.target.value)
+    myApp.services.tasks.changeEcheance(event.target.parentNode.parentNode.parentNode.data, event.target.value);
   },
 
   showTask: (event) => {
