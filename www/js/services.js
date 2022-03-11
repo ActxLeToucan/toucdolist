@@ -18,7 +18,7 @@ myApp.services = {
       let pendingList = document.querySelector('#pending-list');
       pendingList.innerHTML = "";
 
-      myApp.services.fixtures.forEach(function (data) {
+      myApp.services.data.tasks.pending.forEach(function (data) {
         myApp.services.tasks.createTask(data, false);
       });
     },
@@ -27,7 +27,7 @@ myApp.services = {
       let completedTasksPage = document.querySelector('#completed-list');
       completedTasksPage.innerHTML = "";
 
-      myApp.services.completedTasks.forEach(function (data) {
+      myApp.services.data.tasks.completed.forEach(function (data) {
         myApp.services.tasks.createTask(data, true);
       });
     },
@@ -145,7 +145,7 @@ myApp.services = {
     },
 
     addTask: (data) => {
-      myApp.services.fixtures.push(data);
+      myApp.services.data.tasks.pending.push(data);
     },
 
     // Creates a new task and attaches it to the pending task list.
@@ -179,38 +179,38 @@ myApp.services = {
     },
 
     deleteTask: (data, taskCompleted) => {
-      let tab = (taskCompleted ? myApp.services.completedTasks : myApp.services.fixtures);
+      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
       tab.splice(tab.indexOf(data), 1);
     },
 
     changePriority: (data) => {
-      myApp.services.fixtures.find(task => task === data).urgent = !data.urgent;
+      myApp.services.data.tasks.pending.find(task => task === data).urgent = !data.urgent;
     },
 
     changeHighlight: (data) => {
-      myApp.services.fixtures.find(task => task === data).highlight = !data.highlight;
+      myApp.services.data.tasks.pending.find(task => task === data).highlight = !data.highlight;
     },
 
     changeTitle: (data, newTitle) => {
-      myApp.services.fixtures.find(task => task === data).title = newTitle;
+      myApp.services.data.tasks.pending.find(task => task === data).title = newTitle;
     },
 
     changeDescription: (data, newDescription) => {
-      myApp.services.fixtures.find(task => task === data).description = newDescription;
+      myApp.services.data.tasks.pending.find(task => task === data).description = newDescription;
     },
 
     changeCategory: (data, newCateg) => {
-      myApp.services.fixtures.find(task => task === data).category = newCateg;
+      myApp.services.data.tasks.pending.find(task => task === data).category = newCateg;
     },
 
     changeEcheance: (data, newEcheance) => {
       console.log(newEcheance)
-      myApp.services.fixtures.find(task => task === data).echeance = newEcheance;
+      myApp.services.data.tasks.pending.find(task => task === data).echeance = newEcheance;
     },
 
     setState: (data, taskCompleted) => {
-      let tab1 = (taskCompleted ? myApp.services.completedTasks : myApp.services.fixtures);
-      let tab2 = (!taskCompleted ? myApp.services.completedTasks : myApp.services.fixtures);
+      let tab1 = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+      let tab2 = (!taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
 
       tab1.push(data);
       tab2.splice(tab2.indexOf(data), 1);
@@ -218,14 +218,14 @@ myApp.services = {
 
     categoryExist: (name) => {
       let existeDeja = false;
-      myApp.services.categories.forEach(categ => {
+      myApp.services.data.categories.forEach(categ => {
         if (categ.name === name) existeDeja = true;
       });
       return existeDeja;
     },
 
     addCateg: (name, color) => {
-      myApp.services.categories.push({
+      myApp.services.data.categories.push({
         name: name,
         color: color,
         children: []
@@ -260,89 +260,90 @@ myApp.services = {
             <ons-button id="button-new-categ" onclick="myApp.controllers.categories.add.createAlertDialog()">Nouvelle catégorie</ons-button>
           </ons-list-item>`;
 
-      myApp.services.categories.forEach(categ => {
+      myApp.services.data.categories.forEach(categ => {
         myApp.services.tasks.createCateg(categ);
       });
     }
   },
 
-  ////////////////////////
-  // Initial Data Service //
-  ////////////////////////
-  fixtures: [
-    {
-      title: 'Download OnsenUI',
-      category: 'Programming',
-      description: 'Some description.',
-      highlight: true,
-      urgent: false
-    },
-    {
-      title: 'Install Monaca CLI',
-      category: 'Programming',
-      description: 'Some description.',
-      highlight: true,
-      urgent: true
-    },
-    {
-      title: 'Star Onsen UI repo on Github',
-      category: 'Super important',
-      description: 'Some description.',
-      highlight: false,
-      urgent: true
-    },
-    {
-      title: 'Register in the community forum',
-      category: 'Super important',
-      description: 'Some description.',
-      highlight: false,
-      urgent: false
-    },
-    {
-      title: 'Send donations to Fran and Andreas',
-      category: 'Super important',
-      description: 'Some description.',
-      highlight: false,
-      urgent: false
-    },
-    {
-      title: 'Profit',
-      category: '',
-      description: 'Some description.',
-      highlight: false,
-      urgent: false
-    },
-    {
-      title: 'Visit Japan',
-      category: 'Travels',
-      description: 'Some description.',
-      highlight: false,
-      urgent: false
-    },
-    {
-      title: 'Enjoy an Onsen with Onsen UI team',
-      category: 'Personal',
-      description: 'Some description.',
-      highlight: false,
-      urgent: false
-    }
-  ],
+  data: {
+    tasks: {
+      pending: [
+        {
+          title: 'Download OnsenUI',
+          category: 'Programming',
+          description: 'Some description.',
+          highlight: true,
+          urgent: false
+        },
+        {
+          title: 'Install Monaca CLI',
+          category: 'Programming',
+          description: 'Some description.',
+          highlight: true,
+          urgent: true
+        },
+        {
+          title: 'Star Onsen UI repo on Github',
+          category: 'Super important',
+          description: 'Some description.',
+          highlight: false,
+          urgent: true
+        },
+        {
+          title: 'Register in the community forum',
+          category: 'Super important',
+          description: 'Some description.',
+          highlight: false,
+          urgent: false
+        },
+        {
+          title: 'Send donations to Fran and Andreas',
+          category: 'Super important',
+          description: 'Some description.',
+          highlight: false,
+          urgent: false
+        },
+        {
+          title: 'Profit',
+          category: '',
+          description: 'Some description.',
+          highlight: false,
+          urgent: false
+        },
+        {
+          title: 'Visit Japan',
+          category: 'Travels',
+          description: 'Some description.',
+          highlight: false,
+          urgent: false
+        },
+        {
+          title: 'Enjoy an Onsen with Onsen UI team',
+          category: 'Personal',
+          description: 'Some description.',
+          highlight: false,
+          urgent: false
+        }
+      ],
 
-  completedTasks: [
-    {
-      title: 'Hey!',
-      category: 'Personal',
-      description: 'Some description.',
-      highlight: false,
-      urgent: false
-    }
-  ],
+      completed: [
+        {
+          title: 'Hey!',
+          category: 'Personal',
+          description: 'Some description.',
+          highlight: false,
+          urgent: false
+        }
+      ]
+    },
 
-  categories: [
-    {
-      name: 'Programming',
-      color: '#BC3BE7',
-      children: []
-    }
-  ]
+    categories: [
+      {
+        name: 'Programming',
+        color: '#BC3BE7',
+        children: []
+      }
+    ]
+  },
 };
