@@ -7,7 +7,7 @@
     <div class="right">
       <ons-if platform="android">
         <ons-toolbar-button component="button/save-task">
-          <ons-icon onclick="myApp.controllers.addTask(document)" icon="md-save"></ons-icon>
+          <ons-icon onclick="myApp.controllers.tasks.add(document)" icon="md-save"></ons-icon>
         </ons-toolbar-button>
       </ons-if>
     </div>
@@ -36,7 +36,7 @@
     </p>
     <ons-if platform="ios other">
       <p style="margin-top: 30px;">
-        <ons-button onclick="myApp.controllers.addTask(document)">Ajouter</ons-button>
+        <ons-button onclick="myApp.controllers.tasks.add(document)">Ajouter</ons-button>
       </p>
     </ons-if>
   </div>

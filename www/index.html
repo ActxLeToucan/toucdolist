@@ -81,8 +81,8 @@
                 Voulez-vous vraiment supprimer cette tâche ?<br />Cette action est irréversible.
             </div>
             <div class="alert-dialog-footer">
-                <ons-alert-dialog-button onclick="window.myApp.controllers.hideAlertDialogDeleteTask()">Annuler</ons-alert-dialog-button>
-                <ons-alert-dialog-button onclick="window.myApp.controllers.deleteTask()">Continuer</ons-alert-dialog-button>
+                <ons-alert-dialog-button onclick="window.myApp.controllers.tasks.delete.hideAlertDialog()">Annuler</ons-alert-dialog-button>
+                <ons-alert-dialog-button onclick="window.myApp.controllers.tasks.delete.delete()">Continuer</ons-alert-dialog-button>
             </div>
         </ons-alert-dialog>
     </template>

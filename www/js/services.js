@@ -100,7 +100,7 @@ myApp.services = {
         affichage.style.display = "block";
         let newValue = edition.querySelector("ons-input").value;
         affichage.querySelector("#title-content").innerText = newValue;
-        myApp.controllers.changeTitle(e, newValue);
+        myApp.controllers.tasks.edit.title(e, newValue);
       });
       // modification de la description
       page.querySelector("#button-edit-descr").addEventListener("click", (e) => {
@@ -117,7 +117,7 @@ myApp.services = {
         affichage.style.display = "block";
         let newValue = edition.querySelector("ons-input").value;
         affichage.querySelector("#descr-content").innerText = newValue;
-        myApp.controllers.changeDescription(e, newValue);
+        myApp.controllers.tasks.edit.description(e, newValue);
       });
       // modification de la catégorie
       page.querySelector("#button-edit-categ").addEventListener("click", (e) => {
@@ -134,14 +134,14 @@ myApp.services = {
         affichage.style.display = "block";
         let newValue = edition.querySelector("ons-input").value;
         affichage.querySelector("#categ-content").innerText = newValue;
-        myApp.controllers.changeCategory(e, newValue);
+        myApp.controllers.tasks.edit.category(e, newValue);
       });
       // modification surlignage
-      page.querySelector(".highlight-checkbox").addEventListener("change", myApp.controllers.changeHighlight);
+      page.querySelector(".highlight-checkbox").addEventListener("change", myApp.controllers.tasks.edit.highlight);
       // modification urgence
-      page.querySelector(".urgent-checkbox").addEventListener("change", myApp.controllers.changePriotity);
+      page.querySelector(".urgent-checkbox").addEventListener("change", myApp.controllers.tasks.edit.priority);
       // modification echeance
-      page.querySelector(".echeance").addEventListener("change", myApp.controllers.changeEcheance);
+      page.querySelector(".echeance").addEventListener("change", myApp.controllers.tasks.edit.echeance);
     },
 
     addTask: (data) => {
@@ -169,9 +169,9 @@ myApp.services = {
       // Store data within the element.
       taskItem.data = data;
 
-      taskItem.querySelector(".right").addEventListener("click", myApp.controllers.createAlertDialogDeleteTask);
-      taskItem.querySelector("ons-checkbox").addEventListener("change", myApp.controllers.changeState);
-      taskItem.querySelector(".center").addEventListener("click", myApp.controllers.showTask);
+      taskItem.querySelector(".right").addEventListener("click", myApp.controllers.tasks.delete.createAlertDialog);
+      taskItem.querySelector("ons-checkbox").addEventListener("change", myApp.controllers.tasks.changeState);
+      taskItem.querySelector(".center").addEventListener("click", myApp.controllers.tasks.details);
 
       // Insert urgent tasks at the top and non urgent tasks at the bottom.
       let list = (taskCompleted ? document.querySelector('#completed-list') : document.querySelector('#pending-list'));
@@ -247,7 +247,7 @@ myApp.services = {
 
       categ.data = data;
 
-      categ.querySelector(".right").addEventListener("click", myApp.controllers.createAlertDialogEditCateg);
+      categ.querySelector(".right").addEventListener("click", myApp.controllers.categories.edit.createAlertDialog);
 
       let list = document.querySelector('#custom-category-list');
       list.insertBefore(categ, list.firstChild);
@@ -257,7 +257,7 @@ myApp.services = {
       let categs = document.querySelector('#custom-category-list');
       categs.innerHTML = `
           <ons-list-item>
-            <ons-button id="button-new-categ" onclick="myApp.controllers.createAlertDialogNewCateg()">Nouvelle catégorie</ons-button>
+            <ons-button id="button-new-categ" onclick="myApp.controllers.categories.add.createAlertDialog()">Nouvelle catégorie</ons-button>
           </ons-list-item>`;
 
       myApp.services.categories.forEach(categ => {
