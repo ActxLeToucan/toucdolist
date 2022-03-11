@@ -9,10 +9,6 @@
  */
 
 myApp.services = {
-
-  /////////////////
-  // Task Service //
-  /////////////////
   tasks: {
     showPendingList: () => {
       let pendingList = document.querySelector('#pending-list');
@@ -32,7 +28,7 @@ myApp.services = {
       });
     },
 
-    showTask: (task) => {
+    showTask: (task, taskCompleted) => {
       let page = document.querySelector('#details-task-page-content');
       page.innerHTML = `
         <h1 id="title">
@@ -84,6 +80,7 @@ myApp.services = {
 
 
       page.data = task;
+      page.completed = taskCompleted;
 
       // modification du titre
       page.querySelector("#button-edit-title").addEventListener("click", (e) => {
@@ -183,29 +180,34 @@ myApp.services = {
       tab.splice(tab.indexOf(data), 1);
     },
 
-    changePriority: (data) => {
-      myApp.services.data.tasks.pending.find(task => task === data).urgent = !data.urgent;
+    changePriority: (data, taskCompleted) => {
+      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+      tab.find(task => task === data).urgent = !data.urgent;
     },
 
-    changeHighlight: (data) => {
-      myApp.services.data.tasks.pending.find(task => task === data).highlight = !data.highlight;
+    changeHighlight: (data, taskCompleted) => {
+      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+      tab.find(task => task === data).highlight = !data.highlight;
     },
 
-    changeTitle: (data, newTitle) => {
-      myApp.services.data.tasks.pending.find(task => task === data).title = newTitle;
+    changeTitle: (data, taskCompleted, newTitle) => {
+      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+      tab.find(task => task === data).title = newTitle;
     },
 
-    changeDescription: (data, newDescription) => {
-      myApp.services.data.tasks.pending.find(task => task === data).description = newDescription;
+    changeDescription: (data, taskCompleted, newDescription) => {
+      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+      tab.find(task => task === data).description = newDescription;
     },
 
-    changeCategory: (data, newCateg) => {
-      myApp.services.data.tasks.pending.find(task => task === data).category = newCateg;
+    changeCategory: (data, taskCompleted, newCateg) => {
+      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+      tab.find(task => task === data).category = newCateg;
     },
 
-    changeEcheance: (data, newEcheance) => {
-      console.log(newEcheance)
-      myApp.services.data.tasks.pending.find(task => task === data).echeance = newEcheance;
+    changeEcheance: (data, taskCompleted, newEcheance) => {
+      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+      tab.find(task => task === data).echeance = newEcheance;
     },
 
     setState: (data, taskCompleted) => {

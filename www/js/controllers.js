@@ -64,33 +64,38 @@ myApp.controllers = {
 
     edit: {
       priority: (event) => {
-        myApp.services.tasks.changePriority(event.target.parentNode.parentNode.data);
+        let task = event.target.parentNode.parentNode;
+        myApp.services.tasks.changePriority(task.data, task.completed);
         myApp.controllers.updateAffichage();
       },
 
       highlight: (event) => {
-        myApp.services.tasks.changeHighlight(event.target.parentNode.parentNode.data);
+        let task = event.target.parentNode.parentNode;
+        myApp.services.tasks.changeHighlight(task.data, task.completed);
         myApp.controllers.updateAffichage();
       },
 
       title: (event, newValue) => {
-        myApp.services.tasks.changeTitle(event.target.parentNode.parentNode.parentNode.data, newValue);
+        let task = event.target.parentNode.parentNode.parentNode;
+        myApp.services.tasks.changeTitle(task.data, task.completed, newValue);
         myApp.controllers.updateAffichage();
       },
 
       description: (event, newValue) => {
-        myApp.services.tasks.changeDescription(event.target.parentNode.parentNode.parentNode.data, newValue);
+        let task = event.target.parentNode.parentNode.parentNode;
+        myApp.services.tasks.changeDescription(task.data, task.completed, newValue);
         myApp.controllers.updateAffichage();
       },
 
       category: (event, newValue) => {
-        myApp.services.tasks.changeCategory(event.target.parentNode.parentNode.parentNode.data, newValue);
+        let task = event.target.parentNode.parentNode.parentNode;
+        myApp.services.tasks.changeCategory(task.data, task.completed, newValue);
         myApp.controllers.updateAffichage();
       },
 
       echeance: (event) => {
-        console.log(event.target.value)
-        myApp.services.tasks.changeEcheance(event.target.parentNode.parentNode.parentNode.data, event.target.value);
+        let task = event.target.parentNode.parentNode.parentNode;
+        myApp.services.tasks.changeEcheance(task.data, task.completed, event.target.value);
       },
     },
 
@@ -140,7 +145,7 @@ myApp.controllers = {
     details: (event) => {
       let task = event.target.parentNode;
       document.querySelector('ons-navigator').pushPage('html/details_task.html').then(() =>
-          myApp.services.tasks.showTask(task.data)
+          myApp.services.tasks.showTask(task.data, task.querySelector("ons-checkbox").checked)
       );
     },
   },
