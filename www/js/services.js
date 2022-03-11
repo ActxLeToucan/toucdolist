@@ -10,27 +10,80 @@
 
 myApp.services = {
   tasks: {
-    showPendingList: () => {
-      let pendingList = document.querySelector('#pending-list');
-      pendingList.innerHTML = "";
-
-      myApp.services.data.tasks.pending.forEach(function (data) {
-        myApp.services.tasks.createTask(data, false);
-      });
+    add: (data) => {
+      myApp.services.data.tasks.pending.push(data);
     },
 
-    showCompletedList: () => {
-      let completedTasksPage = document.querySelector('#completed-list');
-      completedTasksPage.innerHTML = "";
-
-      myApp.services.data.tasks.completed.forEach(function (data) {
-        myApp.services.tasks.createTask(data, true);
-      });
+    delete: (data, taskCompleted) => {
+      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+      tab.splice(tab.indexOf(data), 1);
     },
 
-    showTask: (task, taskCompleted) => {
-      let page = document.querySelector('#details-task-page-content');
-      page.innerHTML = `
+    edit: {
+      category: (data, taskCompleted, newCateg) => {
+        let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+        tab.find(task => task === data).category = newCateg;
+      },
+
+      description: (data, taskCompleted, newDescription) => {
+        let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+        tab.find(task => task === data).description = newDescription;
+      },
+
+      echeance: (data, taskCompleted, newEcheance) => {
+        let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+        tab.find(task => task === data).echeance = newEcheance;
+      },
+
+      highlight: (data, taskCompleted) => {
+        let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+        tab.find(task => task === data).highlight = !data.highlight;
+      },
+
+      priority: (data, taskCompleted) => {
+        let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+        tab.find(task => task === data).urgent = !data.urgent;
+      },
+
+      title: (data, taskCompleted, newTitle) => {
+        let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+        tab.find(task => task === data).title = newTitle;
+      },
+    },
+
+    generate: {
+      task: (data, taskCompleted) => {
+        // Task item template.
+        let taskItem = ons.createElement(
+            //'<ons-list-item tappable category="' + myApp.services.categories.parseId(data.category)+ '">' +
+            `<ons-list-item tappable category="${data.category}" class="${data.highlight ? "highlight" : ""}">
+          <label class="left">
+            <ons-checkbox ${taskCompleted ? "checked" : ""}></ons-checkbox>
+          </label>
+          <div class="center ${data.urgent ? "task-prio" : ""}">
+            ${data.title}
+          </div>
+          <div class="right">
+            <ons-icon style="color: grey; padding-left: 4px" icon="ion-ios-trash-outline, material:md-delete"></ons-icon>
+          </div>
+        </ons-list-item>`
+        );
+
+        // Store data within the element.
+        taskItem.data = data;
+
+        taskItem.querySelector(".right").addEventListener("click", myApp.controllers.tasks.delete.createAlertDialog);
+        taskItem.querySelector("ons-checkbox").addEventListener("change", myApp.controllers.tasks.edit.state);
+        taskItem.querySelector(".center").addEventListener("click", myApp.controllers.tasks.details);
+
+        // Insert urgent tasks at the top and non urgent tasks at the bottom.
+        let list = (taskCompleted ? document.querySelector('#completed-list') : document.querySelector('#pending-list'));
+        list.insertBefore(taskItem, taskItem.data.urgent ? list.firstChild : null);
+      },
+
+      details: (task, taskCompleted) => {
+        let page = document.querySelector('#details-task-page-content');
+        page.innerHTML = `
         <h1 id="title">
             <div id="title-show" class="show-task-field">
                 <span id="title-content">${task.title}</span>
@@ -76,138 +129,70 @@ myApp.services = {
             <ons-input input-id="echeance" class="echeance" type="date" modifier="underbar">
         </p>
       `;
-      page.querySelector(".echeance").value = task.echeance;
+        page.querySelector(".echeance").value = task.echeance;
 
 
-      page.data = task;
-      page.completed = taskCompleted;
+        page.data = task;
+        page.completed = taskCompleted;
 
-      // modification du titre
-      page.querySelector("#button-edit-title").addEventListener("click", (e) => {
-        let affichage = e.target.parentNode;
-        affichage.style.display = "none";
-        let edition = e.target.parentNode.parentNode.querySelector(".edit-task-field");
-        edition.style.display = "block";
-        edition.querySelector("ons-input").value = affichage.querySelector("#title-content").innerText;
-      });
-      page.querySelector("#button-validate-title").addEventListener("click", (e) => {
-        let edition = e.target.parentNode;
-        edition.style.display = "none";
-        let affichage = e.target.parentNode.parentNode.querySelector(".show-task-field");
-        affichage.style.display = "block";
-        let newValue = edition.querySelector("ons-input").value;
-        affichage.querySelector("#title-content").innerText = newValue;
-        myApp.controllers.tasks.edit.title(e, newValue);
-      });
-      // modification de la description
-      page.querySelector("#button-edit-descr").addEventListener("click", (e) => {
-        let affichage = e.target.parentNode;
-        affichage.style.display = "none";
-        let edition = e.target.parentNode.parentNode.querySelector(".edit-task-field");
-        edition.style.display = "block";
-        edition.querySelector("ons-input").value = affichage.querySelector("#descr-content").innerText;
-      });
-      page.querySelector("#button-validate-descr").addEventListener("click", (e) => {
-        let edition = e.target.parentNode;
-        edition.style.display = "none";
-        let affichage = e.target.parentNode.parentNode.querySelector(".show-task-field");
-        affichage.style.display = "block";
-        let newValue = edition.querySelector("ons-input").value;
-        affichage.querySelector("#descr-content").innerText = newValue;
-        myApp.controllers.tasks.edit.description(e, newValue);
-      });
-      // modification de la catégorie
-      page.querySelector("#button-edit-categ").addEventListener("click", (e) => {
-        let affichage = e.target.parentNode;
-        affichage.style.display = "none";
-        let edition = e.target.parentNode.parentNode.querySelector(".edit-task-field");
-        edition.style.display = "block";
-        edition.querySelector("ons-input").value = affichage.querySelector("#categ-content").innerText;
-      });
-      page.querySelector("#button-validate-categ").addEventListener("click", (e) => {
-        let edition = e.target.parentNode;
-        edition.style.display = "none";
-        let affichage = e.target.parentNode.parentNode.querySelector(".show-task-field");
-        affichage.style.display = "block";
-        let newValue = edition.querySelector("ons-input").value;
-        affichage.querySelector("#categ-content").innerText = newValue;
-        myApp.controllers.tasks.edit.category(e, newValue);
-      });
-      // modification surlignage
-      page.querySelector(".highlight-checkbox").addEventListener("change", myApp.controllers.tasks.edit.highlight);
-      // modification urgence
-      page.querySelector(".urgent-checkbox").addEventListener("change", myApp.controllers.tasks.edit.priority);
-      // modification echeance
-      page.querySelector(".echeance").addEventListener("change", myApp.controllers.tasks.edit.echeance);
-    },
-
-    addTask: (data) => {
-      myApp.services.data.tasks.pending.push(data);
-    },
-
-    // Creates a new task and attaches it to the pending task list.
-    createTask: function (data, taskCompleted) {
-      // Task item template.
-      let taskItem = ons.createElement(
-        //'<ons-list-item tappable category="' + myApp.services.categories.parseId(data.category)+ '">' +
-        `<ons-list-item tappable category="${data.category}" class="${data.highlight ? "highlight" : ""}">
-          <label class="left">
-            <ons-checkbox ${taskCompleted ? "checked" : ""}></ons-checkbox>
-          </label>
-          <div class="center ${data.urgent ? "task-prio" : ""}">
-            ${data.title}
-          </div>
-          <div class="right">
-            <ons-icon style="color: grey; padding-left: 4px" icon="ion-ios-trash-outline, material:md-delete"></ons-icon>
-          </div>
-        </ons-list-item>`
-      );
-
-      // Store data within the element.
-      taskItem.data = data;
-
-      taskItem.querySelector(".right").addEventListener("click", myApp.controllers.tasks.delete.createAlertDialog);
-      taskItem.querySelector("ons-checkbox").addEventListener("change", myApp.controllers.tasks.changeState);
-      taskItem.querySelector(".center").addEventListener("click", myApp.controllers.tasks.details);
-
-      // Insert urgent tasks at the top and non urgent tasks at the bottom.
-      let list = (taskCompleted ? document.querySelector('#completed-list') : document.querySelector('#pending-list'));
-      list.insertBefore(taskItem, taskItem.data.urgent ? list.firstChild : null);
-    },
-
-    deleteTask: (data, taskCompleted) => {
-      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
-      tab.splice(tab.indexOf(data), 1);
-    },
-
-    changePriority: (data, taskCompleted) => {
-      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
-      tab.find(task => task === data).urgent = !data.urgent;
-    },
-
-    changeHighlight: (data, taskCompleted) => {
-      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
-      tab.find(task => task === data).highlight = !data.highlight;
-    },
-
-    changeTitle: (data, taskCompleted, newTitle) => {
-      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
-      tab.find(task => task === data).title = newTitle;
-    },
-
-    changeDescription: (data, taskCompleted, newDescription) => {
-      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
-      tab.find(task => task === data).description = newDescription;
-    },
-
-    changeCategory: (data, taskCompleted, newCateg) => {
-      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
-      tab.find(task => task === data).category = newCateg;
-    },
-
-    changeEcheance: (data, taskCompleted, newEcheance) => {
-      let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
-      tab.find(task => task === data).echeance = newEcheance;
+        // modification du titre
+        page.querySelector("#button-edit-title").addEventListener("click", (e) => {
+          let affichage = e.target.parentNode;
+          affichage.style.display = "none";
+          let edition = e.target.parentNode.parentNode.querySelector(".edit-task-field");
+          edition.style.display = "block";
+          edition.querySelector("ons-input").value = affichage.querySelector("#title-content").innerText;
+        });
+        page.querySelector("#button-validate-title").addEventListener("click", (e) => {
+          let edition = e.target.parentNode;
+          edition.style.display = "none";
+          let affichage = e.target.parentNode.parentNode.querySelector(".show-task-field");
+          affichage.style.display = "block";
+          let newValue = edition.querySelector("ons-input").value;
+          affichage.querySelector("#title-content").innerText = newValue;
+          myApp.controllers.tasks.edit.title(e, newValue);
+        });
+        // modification de la description
+        page.querySelector("#button-edit-descr").addEventListener("click", (e) => {
+          let affichage = e.target.parentNode;
+          affichage.style.display = "none";
+          let edition = e.target.parentNode.parentNode.querySelector(".edit-task-field");
+          edition.style.display = "block";
+          edition.querySelector("ons-input").value = affichage.querySelector("#descr-content").innerText;
+        });
+        page.querySelector("#button-validate-descr").addEventListener("click", (e) => {
+          let edition = e.target.parentNode;
+          edition.style.display = "none";
+          let affichage = e.target.parentNode.parentNode.querySelector(".show-task-field");
+          affichage.style.display = "block";
+          let newValue = edition.querySelector("ons-input").value;
+          affichage.querySelector("#descr-content").innerText = newValue;
+          myApp.controllers.tasks.edit.description(e, newValue);
+        });
+        // modification de la catégorie
+        page.querySelector("#button-edit-categ").addEventListener("click", (e) => {
+          let affichage = e.target.parentNode;
+          affichage.style.display = "none";
+          let edition = e.target.parentNode.parentNode.querySelector(".edit-task-field");
+          edition.style.display = "block";
+          edition.querySelector("ons-input").value = affichage.querySelector("#categ-content").innerText;
+        });
+        page.querySelector("#button-validate-categ").addEventListener("click", (e) => {
+          let edition = e.target.parentNode;
+          edition.style.display = "none";
+          let affichage = e.target.parentNode.parentNode.querySelector(".show-task-field");
+          affichage.style.display = "block";
+          let newValue = edition.querySelector("ons-input").value;
+          affichage.querySelector("#categ-content").innerText = newValue;
+          myApp.controllers.tasks.edit.category(e, newValue);
+        });
+        // modification surlignage
+        page.querySelector(".highlight-checkbox").addEventListener("change", myApp.controllers.tasks.edit.highlight);
+        // modification urgence
+        page.querySelector(".urgent-checkbox").addEventListener("change", myApp.controllers.tasks.edit.priority);
+        // modification echeance
+        page.querySelector(".echeance").addEventListener("change", myApp.controllers.tasks.edit.echeance);
+      }
     },
 
     setState: (data, taskCompleted) => {
@@ -218,15 +203,29 @@ myApp.services = {
       tab2.splice(tab2.indexOf(data), 1);
     },
 
-    categoryExist: (name) => {
-      let existeDeja = false;
-      myApp.services.data.categories.forEach(categ => {
-        if (categ.name === name) existeDeja = true;
-      });
-      return existeDeja;
-    },
+    show: {
+      pendingList: () => {
+        let pendingList = document.querySelector('#pending-list');
+        pendingList.innerHTML = "";
 
-    addCateg: (name, color) => {
+        myApp.services.data.tasks.pending.forEach(function (data) {
+          myApp.services.tasks.generate.task(data, false);
+        });
+      },
+
+      completedList: () => {
+        let completedTasksPage = document.querySelector('#completed-list');
+        completedTasksPage.innerHTML = "";
+
+        myApp.services.data.tasks.completed.forEach(function (data) {
+          myApp.services.tasks.generate.task(data, true);
+        });
+      },
+    },
+  },
+
+  categories: {
+    add: (name, color) => {
       myApp.services.data.categories.push({
         name: name,
         color: color,
@@ -234,18 +233,26 @@ myApp.services = {
       });
     },
 
-    createCateg: (data) => {
+    exists: (name) => {
+      let existeDeja = false;
+      myApp.services.data.categories.forEach(categ => {
+        if (categ.name === name) existeDeja = true;
+      });
+      return existeDeja;
+    },
+
+    generate: (data) => {
       let categ = ons.createElement(`
-        <ons-list-item tappable category-id="${data.name}">
-          <div class="left">
-            <ons-radio name="categoryGroup" input-id="r-${data.name}"></ons-radio>
-          </div>
-          <label class="center" style="color: ${data.color}" for="r-${data.name}">${data.name}</label>
-          <div class="right">
-            <ons-icon style="color: grey; padding-left: 4px" icon="edit, material:md-edit"></ons-icon>
-          </div>
-        </ons-list-item>
-      `);
+      <ons-list-item tappable category-id="${data.name}">
+        <div class="left">
+          <ons-radio name="categoryGroup" input-id="r-${data.name}"></ons-radio>
+        </div>
+        <label class="center" style="color: ${data.color}" for="r-${data.name}">${data.name}</label>
+        <div class="right">
+          <ons-icon style="color: grey; padding-left: 4px" icon="edit, material:md-edit"></ons-icon>
+        </div>
+      </ons-list-item>
+    `);
 
       categ.data = data;
 
@@ -255,7 +262,7 @@ myApp.services = {
       list.insertBefore(categ, list.firstChild);
     },
 
-    showCategs: () => {
+    show: () => {
       let categs = document.querySelector('#custom-category-list');
       categs.innerHTML = `
           <ons-list-item>
@@ -263,7 +270,7 @@ myApp.services = {
           </ons-list-item>`;
 
       myApp.services.data.categories.forEach(categ => {
-        myApp.services.tasks.createCateg(categ);
+        myApp.services.categories.generate(categ);
       });
     }
   },

@@ -32,9 +32,9 @@ myApp.controllers = {
   },
 
   updateAffichage: () => {
-    myApp.services.tasks.showPendingList();
-    myApp.services.tasks.showCompletedList();
-    myApp.services.tasks.showCategs();
+    myApp.services.tasks.show.pendingList();
+    myApp.services.tasks.show.completedList();
+    myApp.services.categories.show();
   },
 
   tasks: {
@@ -56,47 +56,10 @@ myApp.controllers = {
         urgent: urgent,
         echeance: echeance
       };
-      myApp.services.tasks.addTask(newTask)
+      myApp.services.tasks.add(newTask)
       myApp.controllers.updateAffichage();
 
       document.querySelector('ons-navigator').popPage();
-    },
-
-    edit: {
-      priority: (event) => {
-        let task = event.target.parentNode.parentNode;
-        myApp.services.tasks.changePriority(task.data, task.completed);
-        myApp.controllers.updateAffichage();
-      },
-
-      highlight: (event) => {
-        let task = event.target.parentNode.parentNode;
-        myApp.services.tasks.changeHighlight(task.data, task.completed);
-        myApp.controllers.updateAffichage();
-      },
-
-      title: (event, newValue) => {
-        let task = event.target.parentNode.parentNode.parentNode;
-        myApp.services.tasks.changeTitle(task.data, task.completed, newValue);
-        myApp.controllers.updateAffichage();
-      },
-
-      description: (event, newValue) => {
-        let task = event.target.parentNode.parentNode.parentNode;
-        myApp.services.tasks.changeDescription(task.data, task.completed, newValue);
-        myApp.controllers.updateAffichage();
-      },
-
-      category: (event, newValue) => {
-        let task = event.target.parentNode.parentNode.parentNode;
-        myApp.services.tasks.changeCategory(task.data, task.completed, newValue);
-        myApp.controllers.updateAffichage();
-      },
-
-      echeance: (event) => {
-        let task = event.target.parentNode.parentNode.parentNode;
-        myApp.services.tasks.changeEcheance(task.data, task.completed, event.target.value);
-      },
     },
 
     delete: {
@@ -126,27 +89,52 @@ myApp.controllers = {
       delete: () => {
         lastDelClicked.classList.add("animation-remove");
         myApp.controllers.tasks.delete.hideAlertDialog();
-        myApp.services.tasks.deleteTask(lastDelClicked.data, lastDelClicked.querySelector("ons-checkbox").checked);
+        myApp.services.tasks.delete(lastDelClicked.data, lastDelClicked.querySelector("ons-checkbox").checked);
       },
-    },
-
-    changeState: (event) => {
-      let task = event.target.parentNode.parentNode.parentNode;
-
-      if (event.target.checked) {
-        task.classList.add("animation-swipe-right");
-        myApp.services.tasks.setState(task.data, true);
-      } else {
-        task.classList.add("animation-swipe-left");
-        myApp.services.tasks.setState(task.data, false);
-      }
     },
 
     details: (event) => {
       let task = event.target.parentNode;
       document.querySelector('ons-navigator').pushPage('html/details_task.html').then(() =>
-          myApp.services.tasks.showTask(task.data, task.querySelector("ons-checkbox").checked)
+          myApp.services.tasks.generate.details(task.data, task.querySelector("ons-checkbox").checked)
       );
+    },
+
+    edit: {
+      category: (event, newValue) => {
+        let task = event.target.parentNode.parentNode.parentNode;
+        myApp.services.tasks.edit.category(task.data, task.completed, newValue);
+        myApp.controllers.updateAffichage();
+      },
+
+      description: (event, newValue) => {
+        let task = event.target.parentNode.parentNode.parentNode;
+        myApp.services.tasks.edit.description(task.data, task.completed, newValue);
+        myApp.controllers.updateAffichage();
+      },
+
+      echeance: (event) => {
+        let task = event.target.parentNode.parentNode.parentNode;
+        myApp.services.tasks.edit.echeance(task.data, task.completed, event.target.value);
+      },
+
+      priority: (event) => {
+        let task = event.target.parentNode.parentNode;
+        myApp.services.tasks.edit.priority(task.data, task.completed);
+        myApp.controllers.updateAffichage();
+      },
+
+      highlight: (event) => {
+        let task = event.target.parentNode.parentNode;
+        myApp.services.tasks.edit.highlight(task.data, task.completed);
+        myApp.controllers.updateAffichage();
+      },
+
+      title: (event, newValue) => {
+        let task = event.target.parentNode.parentNode.parentNode;
+        myApp.services.tasks.edit.title(task.data, task.completed, newValue);
+        myApp.controllers.updateAffichage();
+      },
     },
   },
 
@@ -187,10 +175,10 @@ myApp.controllers = {
         let color = event.target.parentNode.parentNode.querySelector('#input-new-categ-color').value;
         let name = input.value;
 
-        if (name && !myApp.services.tasks.categoryExist(name)) {
+        if (name && !myApp.services.categories.exists(name)) {
           myApp.controllers.categories.add.hideAlertDialog(event);
-          myApp.services.tasks.addCateg(name, color);
-          myApp.services.tasks.showCategs();
+          myApp.services.categories.add(name, color);
+          myApp.services.categories.show();
         } else {
           res.innerText = "Nom de catégorie invalide.";
         }
