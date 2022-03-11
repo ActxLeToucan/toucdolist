@@ -224,10 +224,11 @@ myApp.services = {
       return existeDeja;
     },
 
-    addCateg: (name) => {
+    addCateg: (name, color) => {
       myApp.services.categories.push({
-        'name': name,
-        'children': []
+        name: name,
+        color: color,
+        children: []
       });
     },
 
@@ -237,11 +238,16 @@ myApp.services = {
           <div class="left">
             <ons-radio name="categoryGroup" input-id="r-${data.name}"></ons-radio>
           </div>
-          <label class="center" for="r-${data.name}">${data.name}</label>
+          <label class="center" style="color: ${data.color}" for="r-${data.name}">${data.name}</label>
+          <div class="right">
+            <ons-icon style="color: grey; padding-left: 4px" icon="edit, material:md-edit"></ons-icon>
+          </div>
         </ons-list-item>
       `);
 
       categ.data = data;
+
+      categ.querySelector(".right").addEventListener("click", myApp.controllers.createAlertDialogEditCateg);
 
       let list = document.querySelector('#custom-category-list');
       list.insertBefore(categ, list.firstChild);
@@ -335,6 +341,7 @@ myApp.services = {
   categories: [
     {
       name: 'Programming',
+      color: '#BC3BE7',
       children: []
     }
   ]

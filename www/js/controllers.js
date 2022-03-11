@@ -162,23 +162,52 @@ myApp.controllers = {
   hideAlertDialogNewCateg: (event) => {
     document.getElementById('alert-dialog-new-categ').hide();
     let input = event.target.parentNode.parentNode.querySelector('#input-new-categ');
+    let color = event.target.parentNode.parentNode.querySelector('#input-new-categ-color');
     let res = event.target.parentNode.parentNode.querySelector('.res-button');
     input.value = "";
     res.innerText = "";
+    color.value = "000000";
   },
 
   createCateg: (event) => {
     let input = event.target.parentNode.parentNode.querySelector('#input-new-categ');
     let res = event.target.parentNode.parentNode.querySelector('.res-button');
+    let color = event.target.parentNode.parentNode.querySelector('#input-new-categ-color').value;
     let name = input.value;
 
     if (name && !myApp.services.tasks.categoryExist(name)) {
       myApp.controllers.hideAlertDialogNewCateg(event);
-      myApp.services.tasks.addCateg(name);
+      myApp.services.tasks.addCateg(name, color);
       myApp.services.tasks.showCategs();
     } else {
       res.innerText = "Nom de catégorie invalide.";
     }
-    console.log(myApp.services.categories);
-  }
+  },
+
+  createAlertDialogEditCateg: (event) => {
+    let dialog = document.getElementById('alert-dialog-edit-categ');
+
+    let data = (event.target.localName === "ons-icon" ? event.target.parentNode.parentNode : event.target.parentNode).data;
+
+    if (dialog) {
+      dialog.show();
+      dialog.childNodes[0].addEventListener("click", myApp.controllers.hideAlertDialogEditCateg);
+
+      dialog.querySelector('#input-edit-categ').value = data.name;
+      dialog.querySelector('#input-edit-categ-color').value = data.color;
+    } else {
+      ons.createElement('edit-categ.html', { append: true })
+          .then(function (dialog) {
+            dialog.show();
+            dialog.childNodes[0].addEventListener("click", myApp.controllers.hideAlertDialogEditCateg);
+
+            dialog.querySelector('#input-edit-categ').value = data.name;
+            dialog.querySelector('#input-edit-categ-color').value = data.color;
+          });
+    }
+  },
+
+  hideAlertDialogEditCateg: (event) => {
+    document.getElementById('alert-dialog-edit-categ').hide();
+  },
 };

@@ -92,12 +92,30 @@
             <div class="alert-dialog-title">Nouvelle catégorie</div>
             <div class="alert-dialog-content">
                 <p>Choisissez un nom pour cette nouvelle catégorie :</p>
-                <ons-input id="input-new-categ" modifier="underbar" placeholder="Catégorie" float></ons-input>
+                <ons-input id="input-new-categ" modifier="underbar" placeholder="Nom" float></ons-input>
+                <br /><br />
+                <label for="input-new-categ-color">Couleur : </label><input id="input-new-categ-color" type="color" />
                 <p class="res-button" style="color: darkred"></p>
             </div>
             <div class="alert-dialog-footer">
                 <ons-alert-dialog-button id="button-cancel-categ">Annuler</ons-alert-dialog-button>
                 <ons-alert-dialog-button id="button-alert-new-categ">Créer</ons-alert-dialog-button>
+            </div>
+        </ons-alert-dialog>
+    </template>
+
+    <template id="edit-categ.html">
+        <ons-alert-dialog id="alert-dialog-edit-categ" modifier="rowfooter">
+            <div class="alert-dialog-title">Édition de la catégorie</div>
+            <div class="alert-dialog-content">
+                <ons-input id="input-edit-categ" modifier="underbar" placeholder="Nom" float></ons-input>
+                <br /><br />
+                <label for="input-edit-categ-color">Couleur : </label><input id="input-edit-categ-color" type="color" />
+                <p class="res-button" style="color: darkred"></p>
+            </div>
+            <div class="alert-dialog-footer">
+                <ons-alert-dialog-button id="button-alert-edit-categ">Valider</ons-alert-dialog-button>
+                <ons-alert-dialog-button id="button-alert-delete-categ" style="color: red">Supprimer</ons-alert-dialog-button>
             </div>
         </ons-alert-dialog>
     </template>
