@@ -1,7 +1,3 @@
-/***********************************************************************
- * App Controllers. These controllers will be called on page initialization. *
- ***********************************************************************/
-
 /**
  * CONTROLLERS
  * Le contrôleur ne doit pas agir directement sur les tâches des tableaux. Il doit appeler les méthodes de services.
@@ -12,14 +8,13 @@ let lastDelClicked = null;
 let nbClickDeleteCateg = 0;
 
 myApp.controllers = {
-
-  //////////////////////////
-  // Tabbar Page Controller //
-  //////////////////////////
   tabbarPage: (page) => {
     // Set button functionality to open/close the menu.
     page.querySelector('[component="button/menu"]').onclick = function() {
       document.querySelector('#mySplitter').left.toggle();
+      document.querySelector("#default-category-list").querySelectorAll("ons-radio").forEach(radio => {
+        radio.addEventListener("change", myApp.controllers.categories.set);
+      });
     };
 
     // Set button functionality to push 'new_task.html' page.
@@ -43,11 +38,18 @@ myApp.controllers = {
     });
   },
 
-  updateAffichage: () => {
-    myApp.services.tasks.show.pendingList();
-    myApp.services.tasks.show.completedList();
-    myApp.services.categories.show();
+  affichage: {
+    updateLists: () => {
+      myApp.services.tasks.show.pendingList();
+      myApp.services.tasks.show.completedList();
+    },
+
+    updateCategories: () => {
+      myApp.services.categories.show();
+    }
   },
+
+
 
   tasks: {
     add: (page) => {
@@ -70,7 +72,7 @@ myApp.controllers = {
         created: Date.now()
       };
       myApp.services.tasks.add(newTask)
-      myApp.controllers.updateAffichage();
+      myApp.controllers.affichage.updateLists();
 
       document.querySelector('ons-navigator').popPage();
     },
@@ -121,14 +123,14 @@ myApp.controllers = {
         let task = event.target.parentNode.parentNode.parentNode;
         let newValue = (event.target.value === "aucune" ? "" : event.target.value);
         myApp.services.tasks.edit.category(task.data, task.completed, newValue);
-        myApp.controllers.updateAffichage();
+        myApp.controllers.affichage.updateLists();
       },
 
       description: (event, newValue) => {
         let task = event.target.parentNode.parentNode.parentNode;
         console.log(task);
         myApp.services.tasks.edit.description(task.data, task.completed, newValue);
-        myApp.controllers.updateAffichage();
+        myApp.controllers.affichage.updateLists()
       },
 
       echeance: (event) => {
@@ -139,13 +141,13 @@ myApp.controllers = {
       priority: (event) => {
         let task = event.target.parentNode.parentNode;
         myApp.services.tasks.edit.priority(task.data, task.completed);
-        myApp.controllers.updateAffichage();
+        myApp.controllers.affichage.updateLists();
       },
 
       highlight: (event) => {
         let task = event.target.parentNode.parentNode;
         myApp.services.tasks.edit.highlight(task.data, task.completed);
-        myApp.controllers.updateAffichage();
+        myApp.controllers.affichage.updateLists();
       },
 
       state: (event) => {
@@ -162,7 +164,7 @@ myApp.controllers = {
       title: (event, newValue) => {
         let task = event.target.parentNode.parentNode.parentNode;
         myApp.services.tasks.edit.title(task.data, task.completed, newValue);
-        myApp.controllers.updateAffichage();
+        myApp.controllers.affichage.updateLists();
       },
     },
   },
@@ -210,7 +212,8 @@ myApp.controllers = {
         if (name && categs.length === 0) {
           myApp.controllers.categories.add.hideAlertDialog(event);
           myApp.services.categories.add(name, color);
-          myApp.controllers.updateAffichage();
+          myApp.controllers.affichage.updateLists();
+          myApp.controllers.affichage.updateCategories();
         } else {
           res.innerText = "Nom de catégorie invalide.";
         }
@@ -266,7 +269,8 @@ myApp.controllers = {
         if (name && ((categs.length === 0) || (categs.length === 1 && categs[0] === data))) {
           myApp.controllers.categories.edit.hideAlertDialog(event);
           myApp.services.categories.edit(data, name, color);
-          myApp.controllers.updateAffichage();
+          myApp.controllers.affichage.updateLists();
+          myApp.controllers.affichage.updateCategories();
         } else {
           res.innerText = "Nom de catégorie invalide.";
         }
@@ -283,8 +287,55 @@ myApp.controllers = {
       } else {
         myApp.controllers.categories.edit.hideAlertDialog(event);
         myApp.services.categories.delete(data);
-        myApp.controllers.updateAffichage();
+        myApp.controllers.setFilter(NO_FILTER);
+        myApp.controllers.affichage.updateLists();
+        myApp.controllers.affichage.updateCategories();
+      }
+    },
+
+    set: (event) => {
+      let categ = event.target.parentNode.parentNode.parentNode;
+      if (categ.data) {
+        myApp.controllers.setFilter(CATEG, categ.data.name);
+      } else {
+
       }
     }
+  },
+
+  setFilter: (filter = NO_FILTER, categ = null) => {
+    FILTER.type = filter;
+    FILTER.category = categ;
+    let defaultFilers = document.querySelector("#default-category-list");
+    let categoryFilters = document.querySelector("#custom-category-list");
+    switch (FILTER.type) {
+      case NO_FILTER: {
+        break;
+      }
+      case CATEG: {
+        break;
+      }
+      case NO_CATEG: {
+        defaultFilers.querySelector("#r-no").checked = true;
+        break;
+      }
+      case ALL_CATEGS: {
+        defaultFilers.querySelector("#r-all").checked = true;
+        break;
+      }
+      case PLANNED: {
+        defaultFilers.querySelector("#r-planned").checked = true;
+        break;
+      }
+      case URGENT: {
+        defaultFilers.querySelector("#r-urgent").checked = true;
+        break;
+      }
+      case DAY: {
+        defaultFilers.querySelector("#r-today").checked = true;
+        break;
+      }
+    }
+    myApp.controllers.affichage.updateLists();
   },
 };

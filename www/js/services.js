@@ -1,15 +1,23 @@
-/***********************************************************************************
- * App Services. This contains the logic of the application organised in modules/objects. *
- ***********************************************************************************/
-
 /**
  * SERVICES
  * Gère les tâches dans les tableaux et peut générer les affichages à partir de ces derniers.
  * Seul le contrôleur doit appeler les méthodes de services. Donc lors d'un évènement, l'action est déclenchée dans le contrôleur.
  */
 
-myApp.services = {
-  tasks: {
+const NO_FILTER = "no_filter";
+const CATEG = "categ";
+const NO_CATEG = "no_categ";
+const ALL_CATEGS = "all_categs";
+const PLANNED = "with_echeance";
+const URGENT = "urgent";
+const DAY = "day";
+
+let FILTER = {
+  type: NO_FILTER,
+  category: null
+};
+
+myApp.services = {tasks: {
     add: (data) => {
       myApp.services.data.tasks.pending.push(data);
     },
@@ -211,7 +219,36 @@ myApp.services = {
         pendingList.innerHTML = "";
 
         myApp.services.data.tasks.pending.forEach(function (data) {
-          myApp.services.tasks.generate.task(data, false);
+          switch (FILTER.type) {
+            case NO_FILTER: {
+              myApp.services.tasks.generate.task(data, false);
+              break;
+            }
+            case CATEG: {
+              if (FILTER.category && data.category === FILTER.category) myApp.services.tasks.generate.task(data, false);
+              break;
+            }
+            case NO_CATEG: {
+              if (data.category === '') myApp.services.tasks.generate.task(data, false);
+              break;
+            }
+            case ALL_CATEGS: {
+              if (data.category !== '') myApp.services.tasks.generate.task(data, false);
+              break;
+            }
+            case PLANNED: {
+              if (data.echeance !== '') myApp.services.tasks.generate.task(data, false);
+              break;
+            }
+            case URGENT: {
+              if (data.urgent) myApp.services.tasks.generate.task(data, false);
+              break;
+            }
+            case DAY: {
+              //TODO
+              break;
+            }
+          }
         });
       },
 
@@ -220,7 +257,36 @@ myApp.services = {
         completedTasksPage.innerHTML = "";
 
         myApp.services.data.tasks.completed.forEach(function (data) {
-          myApp.services.tasks.generate.task(data, true);
+          switch (FILTER.type) {
+            case NO_FILTER: {
+              myApp.services.tasks.generate.task(data, true);
+              break;
+            }
+            case CATEG: {
+              if (FILTER.category && data.category === FILTER.category) myApp.services.tasks.generate.task(data, true);
+              break;
+            }
+            case NO_CATEG: {
+              if (data.category === '') myApp.services.tasks.generate.task(data, true);
+              break;
+            }
+            case ALL_CATEGS: {
+              if (data.category !== '') myApp.services.tasks.generate.task(data, true);
+              break;
+            }
+            case PLANNED: {
+              if (data.echeance !== '') myApp.services.tasks.generate.task(data, true);
+              break;
+            }
+            case URGENT: {
+              if (data.urgent) myApp.services.tasks.generate.task(data, true);
+              break;
+            }
+            case DAY: {
+              //TODO
+              break;
+            }
+          }
         });
       },
     },
@@ -266,19 +332,20 @@ myApp.services = {
 
     generate: (data) => {
       let categ = ons.createElement(`
-      <ons-list-item tappable category-id="${data.name}">
-        <div class="left">
-          <ons-radio name="categoryGroup" input-id="r-${data.name}"></ons-radio>
-        </div>
-        <label class="center" style="color: ${data.color}" for="r-${data.name}">${data.name}</label>
-        <div class="right">
-          <ons-icon style="color: grey; padding-left: 4px" icon="edit, material:md-edit"></ons-icon>
-        </div>
-      </ons-list-item>
-    `);
+        <ons-list-item tappable category-id="${data.name}">
+          <div class="left">
+            <ons-radio name="categoryGroup" input-id="r-${data.name}" ${FILTER.category === data.name ? "checked" : ""}></ons-radio>
+          </div>
+          <label class="center" style="color: ${data.color}" for="r-${data.name}">${data.name}</label>
+          <div class="right">
+            <ons-icon style="color: grey; padding-left: 4px" icon="edit, material:md-edit"></ons-icon>
+          </div>
+        </ons-list-item>
+      `);
 
       categ.data = data;
 
+      categ.querySelector("ons-radio").addEventListener("change", myApp.controllers.categories.set);
       categ.querySelector(".right").addEventListener("click", myApp.controllers.categories.edit.createAlertDialog);
 
       let list = document.querySelector('#custom-category-list');
@@ -313,8 +380,9 @@ myApp.services = {
           title: 'Download OnsenUI',
           category: 'Programming',
           description: 'Some description.',
-          highlight: true,
+          highlight: false,
           urgent: false,
+          echeance: "2022-05-13",
           created: 1647077958676
         },
         {
@@ -323,6 +391,7 @@ myApp.services = {
           description: 'Some description.',
           highlight: true,
           urgent: true,
+          echeance: "",
           created: 1647077958677
         },
         {
@@ -331,14 +400,16 @@ myApp.services = {
           description: 'Some description.',
           highlight: false,
           urgent: true,
+          echeance: "",
           created: 1647077958678
         },
         {
           title: 'Register in the community forum',
           category: 'Super important',
           description: 'Some description.',
-          highlight: false,
+          highlight: true,
           urgent: false,
+          echeance: "",
           created: 1647077958679
         },
         {
@@ -347,6 +418,7 @@ myApp.services = {
           description: 'Some description.',
           highlight: false,
           urgent: false,
+          echeance: "",
           created: 1647077958680
         },
         {
@@ -355,6 +427,7 @@ myApp.services = {
           description: 'Some description.',
           highlight: false,
           urgent: false,
+          echeance: "",
           created: 1647077958681
         },
         {
@@ -363,6 +436,7 @@ myApp.services = {
           description: 'Some description.',
           highlight: false,
           urgent: false,
+          echeance: "",
           created: 1647077958682
         },
         {
@@ -371,6 +445,7 @@ myApp.services = {
           description: 'Some description.',
           highlight: false,
           urgent: false,
+          echeance: "",
           created: 1647077958683
         }
       ],
@@ -382,6 +457,7 @@ myApp.services = {
           description: 'Some description.',
           highlight: false,
           urgent: false,
+          echeance: "",
           created: 1647000000000
         }
       ]
