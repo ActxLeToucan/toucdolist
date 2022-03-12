@@ -9,10 +9,10 @@ const NO_CATEG = "no_categ";
 const ALL_CATEGS = "all_categs";
 const PLANNED = "with_echeance";
 const URGENT = "urgent";
-const TODAY = "day";
+const TODAY = "today";
 
 let FILTER = {
-  type: NO_FILTER,
+  type: TODAY,
   category: null
 };
 
@@ -351,31 +351,38 @@ myApp.controllers = {
       FILTER.type = filter;
       FILTER.category = categ;
       let defaultFilers = document.querySelector("#default-category-list");
-      let categoryFilters = document.querySelector("#custom-category-list");
+      let title = document.querySelector("#tabbarPage").querySelector(".center");
       switch (FILTER.type) {
         case NO_FILTER: {
+          title.innerText = "À faire";
           break;
         }
         case CATEG: {
+          title.innerText = categ;
           break;
         }
         case NO_CATEG: {
+          title.innerText = "Sans catégorie";
           defaultFilers.querySelector("#r-no").checked = true;
           break;
         }
         case ALL_CATEGS: {
+          title.innerText = "Toutes les catégories";
           defaultFilers.querySelector("#r-all").checked = true;
           break;
         }
         case PLANNED: {
+          title.innerText = "📅 Planifié";
           defaultFilers.querySelector("#r-planned").checked = true;
           break;
         }
         case URGENT: {
+          title.innerText = "❗ Important";
           defaultFilers.querySelector("#r-urgent").checked = true;
           break;
         }
         case TODAY: {
+          title.innerText = "🌞 Ma journée";
           defaultFilers.querySelector("#r-today").checked = true;
           break;
         }
