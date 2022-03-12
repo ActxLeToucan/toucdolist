@@ -53,21 +53,26 @@ myApp.services = {
 
     generate: {
       task: (data, taskCompleted) => {
+        let color = '#000000';
+        if (data.category) {
+          let categ = myApp.services.data.categories.find(categ => categ.name === data.category);
+          if (categ) color = categ.color;
+        }
+
         // Task item template.
-        let taskItem = ons.createElement(
-            //'<ons-list-item tappable category="' + myApp.services.categories.parseId(data.category)+ '">' +
-            `<ons-list-item tappable category="${data.category}" class="${data.highlight ? "highlight" : ""}">
-          <label class="left">
-            <ons-checkbox ${taskCompleted ? "checked" : ""}></ons-checkbox>
-          </label>
-          <div class="center ${data.urgent ? "task-prio" : ""}">
-            ${data.title}
-          </div>
-          <div class="right">
-            <ons-icon style="color: grey; padding-left: 4px" icon="ion-ios-trash-outline, material:md-delete"></ons-icon>
-          </div>
-        </ons-list-item>`
-        );
+        let taskItem = ons.createElement(`
+          <ons-list-item tappable category="${data.category}" class="${data.highlight ? "highlight" : ""}">
+            <label class="left">
+              <ons-checkbox ${taskCompleted ? "checked" : ""}></ons-checkbox>
+            </label>
+            <div class="center ${data.urgent ? "task-prio" : ""}" style="color: ${color}">
+              ${data.title}
+            </div>
+            <div class="right">
+              <ons-icon style="color: grey; padding-left: 4px" icon="ion-ios-trash-outline, material:md-delete"></ons-icon>
+            </div>
+          </ons-list-item>
+        `);
 
         // Store data within the element.
         taskItem.data = data;
@@ -84,45 +89,45 @@ myApp.services = {
       details: (task, taskCompleted) => {
         let page = document.querySelector('#details-task-page-content');
         page.innerHTML = `
-        <h1 id="title">
-            <div id="title-show" class="show-task-field">
-                <span id="title-content">${task.title}</span>
-                <ons-button modifier="quiet" id="button-edit-title">Editer ✏️</ons-button>
-            </div>
-            <div id="title-edit" class="edit-task-field">
-                <ons-input id="title" modifier="underbar" placeholder="Titre" float></ons-input>
-                <ons-button modifier="quiet" id="button-validate-title">Valider ✅</ons-button>
-            </div>
-        </h1>
-        <div id="descr">
-            <div id="descr-show" class="show-task-field">
-                <span id="descr-title">Description</span>
-                <ons-button modifier="quiet" id="button-edit-descr">Editer ✏️</ons-button>
-                <br />
-                <span id="descr-content">${task.description}</span>
-            </div>
-            <div id="descr-edit" class="edit-task-field">
-                <ons-input id="descr" modifier="underbar" placeholder="Description" float></ons-input>
-                <ons-button modifier="quiet" id="button-validate-descr">Valider ✅</ons-button>
-            </div>
-        </div>
-        <div id="categ"  style="margin-top: 20px; margin-bottom: 20px">
-            <span style="vertical-align: sub">Catégorie</span>
-            <ons-select id="select-categ">
-                <option value="aucune">(Aucune)</option>
-            </ons-select>
-        </div>
-        <p>
-            <ons-switch input-id="highlight" class="highlight-checkbox" ${task.highlight ? "checked" : ""}></ons-switch><label for="highlight"> Mettre en évidence</label>
-        </p>
-        <p>
-            <ons-switch input-id="urgent" class="urgent-checkbox" ${task.urgent ? "checked" : ""}></ons-switch><label for="urgent"> Définir comme urgent</label>
-        </p>
-        <p>
-            </ons-input><label for="echeance">Échéance</label>
-            <ons-input input-id="echeance" class="echeance" type="date" modifier="underbar">
-        </p>
-      `;
+          <h1 id="title">
+              <div id="title-show" class="show-task-field">
+                  <span id="title-content">${task.title}</span>
+                  <ons-button modifier="quiet" id="button-edit-title">Editer ✏️</ons-button>
+              </div>
+              <div id="title-edit" class="edit-task-field">
+                  <ons-input id="title" modifier="underbar" placeholder="Titre" float></ons-input>
+                  <ons-button modifier="quiet" id="button-validate-title">Valider ✅</ons-button>
+              </div>
+          </h1>
+          <div id="descr">
+              <div id="descr-show" class="show-task-field">
+                  <span id="descr-title">Description</span>
+                  <ons-button modifier="quiet" id="button-edit-descr">Editer ✏️</ons-button>
+                  <br />
+                  <span id="descr-content">${task.description}</span>
+              </div>
+              <div id="descr-edit" class="edit-task-field">
+                  <ons-input id="descr" modifier="underbar" placeholder="Description" float></ons-input>
+                  <ons-button modifier="quiet" id="button-validate-descr">Valider ✅</ons-button>
+              </div>
+          </div>
+          <div id="categ"  style="margin-top: 20px; margin-bottom: 20px">
+              <span style="vertical-align: sub">Catégorie</span>
+              <ons-select id="select-categ">
+                  <option value="aucune">(Aucune)</option>
+              </ons-select>
+          </div>
+          <p>
+              <ons-switch input-id="highlight" class="highlight-checkbox" ${task.highlight ? "checked" : ""}></ons-switch><label for="highlight"> Mettre en évidence</label>
+          </p>
+          <p>
+              <ons-switch input-id="urgent" class="urgent-checkbox" ${task.urgent ? "checked" : ""}></ons-switch><label for="urgent"> Définir comme urgent</label>
+          </p>
+          <p>
+              </ons-input><label for="echeance">Échéance</label>
+              <ons-input input-id="echeance" class="echeance" type="date" modifier="underbar">
+          </p>
+        `;
         page.querySelector(".echeance").value = task.echeance;
 
 
@@ -176,15 +181,6 @@ myApp.services = {
           myApp.controllers.tasks.edit.description(e, newValue);
         });
         // modification de la catégorie
-        /*page.querySelector("#button-validate-categ").addEventListener("click", (e) => {
-          let edition = e.target.parentNode;
-          edition.style.display = "none";
-          let affichage = e.target.parentNode.parentNode.querySelector(".show-task-field");
-          affichage.style.display = "block";
-          let newValue = edition.querySelector("ons-input").value;
-          affichage.querySelector("#categ-content").innerText = newValue;
-          myApp.controllers.tasks.edit.category(e, newValue);
-        });*/
         categSelector.addEventListener("change", myApp.controllers.tasks.edit.category);
         // modification surlignage
         page.querySelector(".highlight-checkbox").addEventListener("change", myApp.controllers.tasks.edit.highlight);
@@ -234,6 +230,16 @@ myApp.services = {
     },
 
     delete: (data) => {
+      myApp.services.data.tasks.pending.forEach(task => {
+        if (task.category === data.name) {
+          task.category = '';
+        }
+      });
+      myApp.services.data.tasks.completed.forEach(task => {
+        if (task.category === data.name) {
+          task.category = '';
+        }
+      });
       myApp.services.data.categories.splice(myApp.services.data.categories.indexOf(data), 1);
     },
 
@@ -371,6 +377,21 @@ myApp.services = {
         name: 'Programming',
         color: '#BC3BE7',
         created: 1647077958676
+      },
+      {
+        name: 'Super important',
+        color: '#ff0000',
+        created: 1647077958677
+      },
+      {
+        name: 'Travels',
+        color: '#008cb7',
+        created: 1647077958678
+      },
+      {
+        name: 'Personal',
+        color: "#00b725",
+        created: 1647077958679
       }
     ]
   },

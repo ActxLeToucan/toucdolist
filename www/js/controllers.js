@@ -183,7 +183,7 @@ myApp.controllers = {
         if (name && categs.length === 0) {
           myApp.controllers.categories.add.hideAlertDialog(event);
           myApp.services.categories.add(name, color);
-          myApp.services.categories.show();
+          myApp.controllers.updateAffichage();
         } else {
           res.innerText = "Nom de catégorie invalide.";
         }
@@ -224,8 +224,10 @@ myApp.controllers = {
         }
       },
 
-      hideAlertDialog: () => {
+      hideAlertDialog: (event) => {
         document.getElementById('alert-dialog-edit-categ').hide();
+        let res = event.target.parentNode.parentNode.querySelector('.res-button');
+        res.innerText = "";
         nbClickDeleteCateg = 0;
       },
 
@@ -240,9 +242,9 @@ myApp.controllers = {
         let categs = myApp.services.categories.getByName(name);
 
         if (name && ((categs.length === 0) || (categs.length === 1 && categs[0] === data))) {
-          myApp.controllers.categories.edit.hideAlertDialog();
+          myApp.controllers.categories.edit.hideAlertDialog(event);
           myApp.services.categories.edit(data, name, color);
-          myApp.services.categories.show();
+          myApp.controllers.updateAffichage();
         } else {
           res.innerText = "Nom de catégorie invalide.";
         }
@@ -254,12 +256,12 @@ myApp.controllers = {
       let res = event.target.parentNode.parentNode.querySelector('.res-button');
 
       if (nbClickDeleteCateg === 0) {
-        res.innerText = "Cette action est irréversible. Appuyez à nouveau sur le bouton \"Supprimer\" pour confirmer.";
+        res.innerText = "Cette action est irréversible. En continuant, les tâches de cette catégorie deviendront sans catégorie.\nAppuyez à nouveau sur le bouton \"Supprimer\" pour confirmer.";
         nbClickDeleteCateg = 1;
       } else {
-        myApp.controllers.categories.edit.hideAlertDialog();
+        myApp.controllers.categories.edit.hideAlertDialog(event);
         myApp.services.categories.delete(data);
-        myApp.services.categories.show();
+        myApp.controllers.updateAffichage();
       }
     }
   },
