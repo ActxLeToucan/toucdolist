@@ -9,6 +9,7 @@
 
 
 let lastDelClicked = null;
+let nbClickDeleteCateg = 0;
 
 myApp.controllers = {
 
@@ -173,9 +174,9 @@ myApp.controllers = {
         let input = event.target.parentNode.parentNode.querySelector('#input-new-categ');
         let res = event.target.parentNode.parentNode.querySelector('.res-button');
         let color = event.target.parentNode.parentNode.querySelector('#input-new-categ-color').value;
-        let name = input.value;
+        let name = input.value.trim();
 
-        if (name && !myApp.services.categories.exists(name)) {
+        if (name) {
           myApp.controllers.categories.add.hideAlertDialog(event);
           myApp.services.categories.add(name, color);
           myApp.services.categories.show();
@@ -195,26 +196,64 @@ myApp.controllers = {
           dialog.show();
           dialog.childNodes[0].addEventListener("click", myApp.controllers.categories.edit.hideAlertDialog);
 
+          dialog.data = data;
+
           dialog.querySelector('#input-edit-categ').value = data.name;
           dialog.querySelector('#input-edit-categ-color').value = data.color;
+
+          dialog.querySelector('#button-alert-edit-categ').addEventListener('click', myApp.controllers.categories.edit.edit);
+          dialog.querySelector('#button-alert-delete-categ').addEventListener('click', myApp.controllers.categories.delete);
         } else {
           ons.createElement('edit-categ.html', { append: true })
               .then(function (dialog) {
                 dialog.show();
                 dialog.childNodes[0].addEventListener("click", myApp.controllers.categories.edit.hideAlertDialog);
 
+                dialog.data = data;
+
                 dialog.querySelector('#input-edit-categ').value = data.name;
                 dialog.querySelector('#input-edit-categ-color').value = data.color;
+
+                dialog.querySelector('#button-alert-edit-categ').addEventListener('click', myApp.controllers.categories.edit.edit);
+                dialog.querySelector('#button-alert-delete-categ').addEventListener('click', myApp.controllers.categories.delete);
               });
         }
       },
 
       hideAlertDialog: () => {
         document.getElementById('alert-dialog-edit-categ').hide();
+        nbClickDeleteCateg = 0;
       },
 
-      edit: () => {
+      edit: (event) => {
+        let data = event.target.parentNode.parentNode.parentNode.parentNode.data;
 
+        let input = event.target.parentNode.parentNode.querySelector('#input-edit-categ');
+        let res = event.target.parentNode.parentNode.querySelector('.res-button');
+        let color = event.target.parentNode.parentNode.querySelector('#input-edit-categ-color').value;
+        let name = input.value.trim();
+
+        if (name) {
+          myApp.controllers.categories.edit.hideAlertDialog();
+          myApp.services.categories.edit(data, name, color);
+          myApp.services.categories.show();
+        } else {
+          res.innerText = "Nom de catégorie invalide.";
+        }
+      }
+    },
+
+    delete: (event) => {
+      let data = event.target.parentNode.parentNode.parentNode.parentNode.data;
+      let res = event.target.parentNode.parentNode.querySelector('.res-button');
+
+      if (nbClickDeleteCateg === 0) {
+        res.innerText = "Cette action est irréversible. Appuyez à nouveau sur le bouton \"Supprimer\" pour confirmer.";
+        nbClickDeleteCateg = 1;
+      } else {
+        myApp.controllers.categories.edit.hideAlertDialog();
+        myApp.services.categories.delete(data);
+        myApp.services.categories.show();
       }
     }
   },

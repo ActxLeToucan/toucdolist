@@ -17,7 +17,8 @@ ons-splitter-side[side="left"][animation="overlay"] {
 
 .highlight {
   background-color: lightyellow !important;
-  color: rgba(255, 0, 0, 0.7);
+  /*color: rgba(255, 0, 0, 0.7);*/
+  font-weight: bold;
 }
 
 .left-label {

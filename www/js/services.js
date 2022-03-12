@@ -229,16 +229,17 @@ myApp.services = {
       myApp.services.data.categories.push({
         name: name,
         color: color,
-        children: []
+        created: Date.now()
       });
     },
 
-    exists: (name) => {
-      let existeDeja = false;
-      myApp.services.data.categories.forEach(categ => {
-        if (categ.name === name) existeDeja = true;
-      });
-      return existeDeja;
+    delete: (data) => {
+      myApp.services.data.categories.splice(myApp.services.data.categories.indexOf(data), 1);
+    },
+
+    edit: (data, name, color) => {
+      myApp.services.data.categories.find(categ => categ === data).name = name;
+      myApp.services.data.categories.find(categ => categ === data).color = color;
     },
 
     generate: (data) => {
@@ -351,7 +352,7 @@ myApp.services = {
       {
         name: 'Programming',
         color: '#BC3BE7',
-        children: []
+        created: 1647077958676
       }
     ]
   },
