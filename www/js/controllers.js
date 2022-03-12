@@ -102,14 +102,16 @@ myApp.controllers = {
     },
 
     edit: {
-      category: (event, newValue) => {
+      category: (event) => {
         let task = event.target.parentNode.parentNode.parentNode;
+        let newValue = (event.target.value === "aucune" ? "" : event.target.value);
         myApp.services.tasks.edit.category(task.data, task.completed, newValue);
         myApp.controllers.updateAffichage();
       },
 
       description: (event, newValue) => {
         let task = event.target.parentNode.parentNode.parentNode;
+        console.log(task);
         myApp.services.tasks.edit.description(task.data, task.completed, newValue);
         myApp.controllers.updateAffichage();
       },
@@ -176,7 +178,9 @@ myApp.controllers = {
         let color = event.target.parentNode.parentNode.querySelector('#input-new-categ-color').value;
         let name = input.value.trim();
 
-        if (name) {
+        let categs = myApp.services.categories.getByName(name);
+
+        if (name && categs.length === 0) {
           myApp.controllers.categories.add.hideAlertDialog(event);
           myApp.services.categories.add(name, color);
           myApp.services.categories.show();
@@ -233,7 +237,9 @@ myApp.controllers = {
         let color = event.target.parentNode.parentNode.querySelector('#input-edit-categ-color').value;
         let name = input.value.trim();
 
-        if (name) {
+        let categs = myApp.services.categories.getByName(name);
+
+        if (name && ((categs.length === 0) || (categs.length === 1 && categs[0] === data))) {
           myApp.controllers.categories.edit.hideAlertDialog();
           myApp.services.categories.edit(data, name, color);
           myApp.services.categories.show();

@@ -106,17 +106,11 @@ myApp.services = {
                 <ons-button modifier="quiet" id="button-validate-descr">Valider ✅</ons-button>
             </div>
         </div>
-        <div id="categ">
-            <div id="categ-show" class="show-task-field">
-                <span id="categ-title">Catégorie</span>
-                <ons-button modifier="quiet" id="button-edit-categ">Editer ✏️</ons-button>
-                <br />
-                <span id="categ-content">${task.category}</span>
-            </div>
-            <div id="categ-edit" class="edit-task-field">
-                <ons-input id="categ" modifier="underbar" placeholder="Catégorie" float></ons-input>
-                <ons-button modifier="quiet" id="button-validate-categ">Valider ✅</ons-button>
-            </div>
+        <div id="categ"  style="margin-top: 20px; margin-bottom: 20px">
+            <span style="vertical-align: sub">Catégorie</span>
+            <ons-select id="select-categ">
+                <option value="aucune">(Aucune)</option>
+            </ons-select>
         </div>
         <p>
             <ons-switch input-id="highlight" class="highlight-checkbox" ${task.highlight ? "checked" : ""}></ons-switch><label for="highlight"> Mettre en évidence</label>
@@ -125,7 +119,7 @@ myApp.services = {
             <ons-switch input-id="urgent" class="urgent-checkbox" ${task.urgent ? "checked" : ""}></ons-switch><label for="urgent"> Définir comme urgent</label>
         </p>
         <p>
-            </ons-input><label for="echeancve">Échéance</label>
+            </ons-input><label for="echeance">Échéance</label>
             <ons-input input-id="echeance" class="echeance" type="date" modifier="underbar">
         </p>
       `;
@@ -134,6 +128,18 @@ myApp.services = {
 
         page.data = task;
         page.completed = taskCompleted;
+
+
+        let categSelector = page.querySelector("#select-categ").querySelector("select");
+        myApp.services.data.categories.forEach(categ => {
+          let elemCateg = ons.createElement(`
+            <option ${task.category === categ.name ? "selected" : ""}>${categ.name}</option>
+          `);
+
+          elemCateg.data = categ;
+
+          categSelector.insertBefore(elemCateg, null);
+        });
 
         // modification du titre
         page.querySelector("#button-edit-title").addEventListener("click", (e) => {
@@ -170,14 +176,7 @@ myApp.services = {
           myApp.controllers.tasks.edit.description(e, newValue);
         });
         // modification de la catégorie
-        page.querySelector("#button-edit-categ").addEventListener("click", (e) => {
-          let affichage = e.target.parentNode;
-          affichage.style.display = "none";
-          let edition = e.target.parentNode.parentNode.querySelector(".edit-task-field");
-          edition.style.display = "block";
-          edition.querySelector("ons-input").value = affichage.querySelector("#categ-content").innerText;
-        });
-        page.querySelector("#button-validate-categ").addEventListener("click", (e) => {
+        /*page.querySelector("#button-validate-categ").addEventListener("click", (e) => {
           let edition = e.target.parentNode;
           edition.style.display = "none";
           let affichage = e.target.parentNode.parentNode.querySelector(".show-task-field");
@@ -185,7 +184,8 @@ myApp.services = {
           let newValue = edition.querySelector("ons-input").value;
           affichage.querySelector("#categ-content").innerText = newValue;
           myApp.controllers.tasks.edit.category(e, newValue);
-        });
+        });*/
+        categSelector.addEventListener("change", myApp.controllers.tasks.edit.category);
         // modification surlignage
         page.querySelector(".highlight-checkbox").addEventListener("change", myApp.controllers.tasks.edit.highlight);
         // modification urgence
@@ -238,6 +238,16 @@ myApp.services = {
     },
 
     edit: (data, name, color) => {
+      myApp.services.data.tasks.pending.forEach(task => {
+        if (task.category === data.name) {
+          task.category = name;
+        }
+      });
+      myApp.services.data.tasks.completed.forEach(task => {
+        if (task.category === data.name) {
+          task.category = name;
+        }
+      });
       myApp.services.data.categories.find(categ => categ === data).name = name;
       myApp.services.data.categories.find(categ => categ === data).color = color;
     },
@@ -261,6 +271,14 @@ myApp.services = {
 
       let list = document.querySelector('#custom-category-list');
       list.insertBefore(categ, list.firstChild);
+    },
+
+    getByName: (name) => {
+      let tab = [];
+      myApp.services.data.categories.forEach(categ => {
+        if (categ.name === name) tab.push(categ);
+      });
+      return tab;
     },
 
     show: () => {

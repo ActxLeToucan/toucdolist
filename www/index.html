@@ -82,7 +82,7 @@
             </div>
             <div class="alert-dialog-footer">
                 <ons-alert-dialog-button onclick="window.myApp.controllers.tasks.delete.hideAlertDialog()">Annuler</ons-alert-dialog-button>
-                <ons-alert-dialog-button onclick="window.myApp.controllers.tasks.delete.delete()">Continuer</ons-alert-dialog-button>
+                <ons-alert-dialog-button style="color: red" onclick="window.myApp.controllers.tasks.delete.delete()">Supprimer</ons-alert-dialog-button>
             </div>
         </ons-alert-dialog>
     </template>
@@ -98,8 +98,8 @@
                 <p class="res-button" style="color: darkred"></p>
             </div>
             <div class="alert-dialog-footer">
-                <ons-alert-dialog-button id="button-cancel-categ">Annuler</ons-alert-dialog-button>
                 <ons-alert-dialog-button id="button-alert-new-categ">Créer</ons-alert-dialog-button>
+                <ons-alert-dialog-button id="button-cancel-categ">Annuler</ons-alert-dialog-button>
             </div>
         </ons-alert-dialog>
     </template>
