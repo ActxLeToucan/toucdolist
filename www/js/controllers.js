@@ -25,7 +25,18 @@ myApp.controllers = {
     // Set button functionality to push 'new_task.html' page.
     Array.prototype.forEach.call(page.querySelectorAll('[component="button/new-task"]'), function(element) {
       element.onclick = function() {
-        document.querySelector('#myNavigator').pushPage('html/new_task.html');
+        document.querySelector('#myNavigator').pushPage('html/new_task.html').then(() => {
+          let categSelector = document.querySelector("#select-categ").querySelector("select");
+          myApp.services.data.categories.forEach(categ => {
+            let elemCateg = ons.createElement(`
+              <option>${categ.name}</option>
+            `);
+
+            elemCateg.data = categ;
+
+            categSelector.insertBefore(elemCateg, null);
+          });
+        });
       };
 
       element.show && element.show(); // Fix ons-fab in Safari.
@@ -42,7 +53,7 @@ myApp.controllers = {
     add: (page) => {
       const titre = page.getElementById("titre").value.trim();
       const description = page.getElementById("description").value.trim();
-      const categorie = page.getElementById("categorie").value.trim();
+      const categorie = page.querySelector("#select-categ").querySelector("select").value;
       const highlight = page.querySelector('.highlight-checkbox').checked;
       const urgent = page.querySelector('.urgent-checkbox').checked;
       const echeance = page.querySelector('.echeance').value;
@@ -55,7 +66,8 @@ myApp.controllers = {
         description: description,
         highlight: highlight,
         urgent: urgent,
-        echeance: echeance
+        echeance: echeance,
+        created: Date.now()
       };
       myApp.services.tasks.add(newTask)
       myApp.controllers.updateAffichage();
@@ -71,15 +83,18 @@ myApp.controllers = {
         let dialog = document.getElementById('alert-dialog-delete-task');
 
         if (dialog) {
-          dialog.show();
-          dialog.childNodes[0].addEventListener("click", myApp.controllers.tasks.delete.hideAlertDialog);
+          myApp.controllers.tasks.delete.showDialog(dialog);
         } else {
           ons.createElement('delete-task.html', { append: true })
               .then(function (dialog) {
-                dialog.show();
-                dialog.childNodes[0].addEventListener("click", myApp.controllers.tasks.delete.hideAlertDialog);
+                myApp.controllers.tasks.delete.showDialog(dialog);
               });
         }
+      },
+
+      showDialog: (dialog) => {
+        dialog.show();
+        dialog.childNodes[0].addEventListener("click", myApp.controllers.tasks.delete.hideAlertDialog);
       },
 
       hideAlertDialog: () => {
@@ -133,6 +148,17 @@ myApp.controllers = {
         myApp.controllers.updateAffichage();
       },
 
+      state: (event) => {
+        let task = event.target.parentNode.parentNode.parentNode;
+        if (event.target.checked) {
+          task.classList.add("animation-swipe-right");
+          myApp.services.tasks.setState(task.data, true);
+        } else {
+          task.classList.add("animation-swipe-left");
+          myApp.services.tasks.setState(task.data, false);
+        }
+      },
+
       title: (event, newValue) => {
         let task = event.target.parentNode.parentNode.parentNode;
         myApp.services.tasks.edit.title(task.data, task.completed, newValue);
@@ -147,19 +173,20 @@ myApp.controllers = {
         let dialog = document.getElementById('alert-dialog-new-categ');
 
         if (dialog) {
-          dialog.show();
-          dialog.childNodes[0].addEventListener("click", myApp.controllers.categories.add.hideAlertDialog);
-          dialog.querySelector('#button-cancel-categ').addEventListener('click', myApp.controllers.categories.add.hideAlertDialog);
-          dialog.querySelector('#button-alert-new-categ').addEventListener('click', myApp.controllers.categories.add.add);
+          myApp.controllers.categories.add.showDialog(dialog);
         } else {
           ons.createElement('new-categ.html', { append: true })
               .then(function (dialog) {
-                dialog.show();
-                dialog.childNodes[0].addEventListener("click", myApp.controllers.categories.add.hideAlertDialog);
-                dialog.querySelector('#button-cancel-categ').addEventListener('click', myApp.controllers.categories.add.hideAlertDialog);
-                dialog.querySelector('#button-alert-new-categ').addEventListener('click', myApp.controllers.categories.add.add);
+                myApp.controllers.categories.add.showDialog(dialog);
               });
         }
+      },
+
+      showDialog: (dialog) => {
+        dialog.show();
+        dialog.childNodes[0].addEventListener("click", myApp.controllers.categories.add.hideAlertDialog);
+        dialog.querySelector('#button-cancel-categ').addEventListener('click', myApp.controllers.categories.add.hideAlertDialog);
+        dialog.querySelector('#button-alert-new-categ').addEventListener('click', myApp.controllers.categories.add.add);
       },
 
       hideAlertDialog: (event) => {
@@ -197,31 +224,26 @@ myApp.controllers = {
         let data = (event.target.localName === "ons-icon" ? event.target.parentNode.parentNode : event.target.parentNode).data;
 
         if (dialog) {
-          dialog.show();
-          dialog.childNodes[0].addEventListener("click", myApp.controllers.categories.edit.hideAlertDialog);
-
-          dialog.data = data;
-
-          dialog.querySelector('#input-edit-categ').value = data.name;
-          dialog.querySelector('#input-edit-categ-color').value = data.color;
-
-          dialog.querySelector('#button-alert-edit-categ').addEventListener('click', myApp.controllers.categories.edit.edit);
-          dialog.querySelector('#button-alert-delete-categ').addEventListener('click', myApp.controllers.categories.delete);
+          myApp.controllers.categories.edit.showDialog(dialog, data);
         } else {
           ons.createElement('edit-categ.html', { append: true })
               .then(function (dialog) {
-                dialog.show();
-                dialog.childNodes[0].addEventListener("click", myApp.controllers.categories.edit.hideAlertDialog);
-
-                dialog.data = data;
-
-                dialog.querySelector('#input-edit-categ').value = data.name;
-                dialog.querySelector('#input-edit-categ-color').value = data.color;
-
-                dialog.querySelector('#button-alert-edit-categ').addEventListener('click', myApp.controllers.categories.edit.edit);
-                dialog.querySelector('#button-alert-delete-categ').addEventListener('click', myApp.controllers.categories.delete);
+                myApp.controllers.categories.edit.showDialog(dialog, data);
               });
         }
+      },
+
+      showDialog: (dialog, data) => {
+        dialog.show();
+        dialog.childNodes[0].addEventListener("click", myApp.controllers.categories.edit.hideAlertDialog);
+
+        dialog.data = data;
+
+        dialog.querySelector('#input-edit-categ').value = data.name;
+        dialog.querySelector('#input-edit-categ-color').value = data.color;
+
+        dialog.querySelector('#button-alert-edit-categ').addEventListener('click', myApp.controllers.categories.edit.edit);
+        dialog.querySelector('#button-alert-delete-categ').addEventListener('click', myApp.controllers.categories.delete);
       },
 
       hideAlertDialog: (event) => {

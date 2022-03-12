@@ -87,6 +87,9 @@ myApp.services = {
       },
 
       details: (task, taskCompleted) => {
+        let dateTime = new Date(task.created);
+        let date = `Tâche créée le ${dateTime.getDate().toString().padStart(2, '0')}/${(dateTime.getMonth()+1).toString().padStart(2, '0')}/${dateTime.getFullYear()} à ${dateTime.getHours().toString().padStart(2, '0')}:${dateTime.getMinutes().toString().padStart(2, '0')}.`;
+
         let page = document.querySelector('#details-task-page-content');
         page.innerHTML = `
           <h1 id="title">
@@ -112,21 +115,24 @@ myApp.services = {
               </div>
           </div>
           <div id="categ"  style="margin-top: 20px; margin-bottom: 20px">
-              <span style="vertical-align: sub">Catégorie</span>
+              <span style="vertical-align: sub">Catégorie </span>
               <ons-select id="select-categ">
                   <option value="aucune">(Aucune)</option>
               </ons-select>
           </div>
           <p>
-              <ons-switch input-id="highlight" class="highlight-checkbox" ${task.highlight ? "checked" : ""}></ons-switch><label for="highlight"> Mettre en évidence</label>
+              <label for="highlight">Mettre en évidence </label>
+              <ons-switch input-id="highlight" class="highlight-checkbox" ${task.highlight ? "checked" : ""}></ons-switch>
           </p>
           <p>
-              <ons-switch input-id="urgent" class="urgent-checkbox" ${task.urgent ? "checked" : ""}></ons-switch><label for="urgent"> Définir comme urgent</label>
+              <label for="urgent">Définir comme urgent </label>
+              <ons-switch input-id="urgent" class="urgent-checkbox" ${task.urgent ? "checked" : ""}></ons-switch>
           </p>
           <p>
-              </ons-input><label for="echeance">Échéance</label>
-              <ons-input input-id="echeance" class="echeance" type="date" modifier="underbar">
+              <label for="echeance">Échéance </label>
+              <ons-input input-id="echeance" class="echeance" type="date" modifier="underbar"></ons-input>
           </p>
+          <p class="task-created">${date}</p>
         `;
         page.querySelector(".echeance").value = task.echeance;
 
@@ -308,56 +314,64 @@ myApp.services = {
           category: 'Programming',
           description: 'Some description.',
           highlight: true,
-          urgent: false
+          urgent: false,
+          created: 1647077958676
         },
         {
           title: 'Install Monaca CLI',
           category: 'Programming',
           description: 'Some description.',
           highlight: true,
-          urgent: true
+          urgent: true,
+          created: 1647077958677
         },
         {
           title: 'Star Onsen UI repo on Github',
           category: 'Super important',
           description: 'Some description.',
           highlight: false,
-          urgent: true
+          urgent: true,
+          created: 1647077958678
         },
         {
           title: 'Register in the community forum',
           category: 'Super important',
           description: 'Some description.',
           highlight: false,
-          urgent: false
+          urgent: false,
+          created: 1647077958679
         },
         {
           title: 'Send donations to Fran and Andreas',
           category: 'Super important',
           description: 'Some description.',
           highlight: false,
-          urgent: false
+          urgent: false,
+          created: 1647077958680
         },
         {
           title: 'Profit',
           category: '',
           description: 'Some description.',
           highlight: false,
-          urgent: false
+          urgent: false,
+          created: 1647077958681
         },
         {
           title: 'Visit Japan',
           category: 'Travels',
           description: 'Some description.',
           highlight: false,
-          urgent: false
+          urgent: false,
+          created: 1647077958682
         },
         {
           title: 'Enjoy an Onsen with Onsen UI team',
           category: 'Personal',
           description: 'Some description.',
           highlight: false,
-          urgent: false
+          urgent: false,
+          created: 1647077958683
         }
       ],
 
@@ -367,7 +381,8 @@ myApp.services = {
           category: 'Personal',
           description: 'Some description.',
           highlight: false,
-          urgent: false
+          urgent: false,
+          created: 1647000000000
         }
       ]
     },

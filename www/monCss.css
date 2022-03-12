@@ -20,3 +20,13 @@
     margin-right: auto;
     margin-left: auto;
 }
+
+.task-created {
+    margin-top: 50px;
+    color: #6d6d72;
+    font-size: smaller;
+}
+
+label {
+    vertical-align: middle;
+}
