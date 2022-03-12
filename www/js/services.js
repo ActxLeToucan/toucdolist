@@ -4,19 +4,6 @@
  * Seul le contrôleur doit appeler les méthodes de services. Donc lors d'un évènement, l'action est déclenchée dans le contrôleur.
  */
 
-const NO_FILTER = "no_filter";
-const CATEG = "categ";
-const NO_CATEG = "no_categ";
-const ALL_CATEGS = "all_categs";
-const PLANNED = "with_echeance";
-const URGENT = "urgent";
-const DAY = "day";
-
-let FILTER = {
-  type: NO_FILTER,
-  category: null
-};
-
 myApp.services = {tasks: {
     add: (data) => {
       myApp.services.data.tasks.pending.push(data);
@@ -244,7 +231,7 @@ myApp.services = {tasks: {
               if (data.urgent) myApp.services.tasks.generate.task(data, false);
               break;
             }
-            case DAY: {
+            case TODAY: {
               //TODO
               break;
             }
@@ -282,7 +269,7 @@ myApp.services = {tasks: {
               if (data.urgent) myApp.services.tasks.generate.task(data, true);
               break;
             }
-            case DAY: {
+            case TODAY: {
               //TODO
               break;
             }
@@ -291,6 +278,8 @@ myApp.services = {tasks: {
       },
     },
   },
+
+
 
   categories: {
     add: (name, color) => {
@@ -345,7 +334,7 @@ myApp.services = {tasks: {
 
       categ.data = data;
 
-      categ.querySelector("ons-radio").addEventListener("change", myApp.controllers.categories.set);
+      categ.querySelector("ons-radio").addEventListener("change", myApp.controllers.filter.eventHandler);
       categ.querySelector(".right").addEventListener("click", myApp.controllers.categories.edit.createAlertDialog);
 
       let list = document.querySelector('#custom-category-list');
@@ -372,6 +361,8 @@ myApp.services = {tasks: {
       });
     }
   },
+
+
 
   data: {
     tasks: {

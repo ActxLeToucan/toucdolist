@@ -3,6 +3,18 @@
  * Le contrôleur ne doit pas agir directement sur les tâches des tableaux. Il doit appeler les méthodes de services.
  */
 
+const NO_FILTER = "no_filter";
+const CATEG = "categ";
+const NO_CATEG = "no_categ";
+const ALL_CATEGS = "all_categs";
+const PLANNED = "with_echeance";
+const URGENT = "urgent";
+const TODAY = "day";
+
+let FILTER = {
+  type: NO_FILTER,
+  category: null
+};
 
 let lastDelClicked = null;
 let nbClickDeleteCateg = 0;
@@ -13,7 +25,7 @@ myApp.controllers = {
     page.querySelector('[component="button/menu"]').onclick = function() {
       document.querySelector('#mySplitter').left.toggle();
       document.querySelector("#default-category-list").querySelectorAll("ons-radio").forEach(radio => {
-        radio.addEventListener("change", myApp.controllers.categories.set);
+        radio.addEventListener("change", myApp.controllers.filter.eventHandler);
       });
     };
 
@@ -37,6 +49,8 @@ myApp.controllers = {
       element.show && element.show(); // Fix ons-fab in Safari.
     });
   },
+
+
 
   affichage: {
     updateLists: () => {
@@ -108,7 +122,7 @@ myApp.controllers = {
         lastDelClicked.classList.add("animation-remove");
         myApp.controllers.tasks.delete.hideAlertDialog();
         myApp.services.tasks.delete(lastDelClicked.data, lastDelClicked.querySelector("ons-checkbox").checked);
-      },
+      }
     },
 
     details: (event) => {
@@ -165,9 +179,11 @@ myApp.controllers = {
         let task = event.target.parentNode.parentNode.parentNode;
         myApp.services.tasks.edit.title(task.data, task.completed, newValue);
         myApp.controllers.affichage.updateLists();
-      },
-    },
+      }
+    }
   },
+
+
 
   categories: {
     add: {
@@ -217,7 +233,7 @@ myApp.controllers = {
         } else {
           res.innerText = "Nom de catégorie invalide.";
         }
-      },
+      }
     },
 
     edit: {
@@ -287,55 +303,84 @@ myApp.controllers = {
       } else {
         myApp.controllers.categories.edit.hideAlertDialog(event);
         myApp.services.categories.delete(data);
-        myApp.controllers.setFilter(NO_FILTER);
+        myApp.controllers.filter.set(ALL_CATEGS);
         myApp.controllers.affichage.updateLists();
         myApp.controllers.affichage.updateCategories();
       }
-    },
+    }
+  },
 
-    set: (event) => {
+
+
+  filter: {
+    eventHandler: (event) => {
       let categ = event.target.parentNode.parentNode.parentNode;
       if (categ.data) {
-        myApp.controllers.setFilter(CATEG, categ.data.name);
+        myApp.controllers.filter.set(CATEG, categ.data.name);
       } else {
+        switch (event.target.id) {
+          case "r-today": {
+            myApp.controllers.filter.set(TODAY);
+            break;
+          }
+          case "r-urgent": {
+            myApp.controllers.filter.set(URGENT);
+            break;
+          }
+          case "r-planned": {
+            myApp.controllers.filter.set(PLANNED);
+            break;
+          }
+          case "r-all": {
+            myApp.controllers.filter.set(ALL_CATEGS);
+            break;
+          }
+          case "r-no": {
+            myApp.controllers.filter.set(NO_CATEG);
+            break;
+          }
+          default: {
+            myApp.controllers.filter.set(NO_FILTER);
+            break;
+          }
+        }
+      }
+    },
 
+    set: (filter = NO_FILTER, categ = null) => {
+      FILTER.type = filter;
+      FILTER.category = categ;
+      let defaultFilers = document.querySelector("#default-category-list");
+      let categoryFilters = document.querySelector("#custom-category-list");
+      switch (FILTER.type) {
+        case NO_FILTER: {
+          break;
+        }
+        case CATEG: {
+          break;
+        }
+        case NO_CATEG: {
+          defaultFilers.querySelector("#r-no").checked = true;
+          break;
+        }
+        case ALL_CATEGS: {
+          defaultFilers.querySelector("#r-all").checked = true;
+          break;
+        }
+        case PLANNED: {
+          defaultFilers.querySelector("#r-planned").checked = true;
+          break;
+        }
+        case URGENT: {
+          defaultFilers.querySelector("#r-urgent").checked = true;
+          break;
+        }
+        case TODAY: {
+          defaultFilers.querySelector("#r-today").checked = true;
+          break;
+        }
       }
+      myApp.controllers.affichage.updateLists();
     }
-  },
-
-  setFilter: (filter = NO_FILTER, categ = null) => {
-    FILTER.type = filter;
-    FILTER.category = categ;
-    let defaultFilers = document.querySelector("#default-category-list");
-    let categoryFilters = document.querySelector("#custom-category-list");
-    switch (FILTER.type) {
-      case NO_FILTER: {
-        break;
-      }
-      case CATEG: {
-        break;
-      }
-      case NO_CATEG: {
-        defaultFilers.querySelector("#r-no").checked = true;
-        break;
-      }
-      case ALL_CATEGS: {
-        defaultFilers.querySelector("#r-all").checked = true;
-        break;
-      }
-      case PLANNED: {
-        defaultFilers.querySelector("#r-planned").checked = true;
-        break;
-      }
-      case URGENT: {
-        defaultFilers.querySelector("#r-urgent").checked = true;
-        break;
-      }
-      case DAY: {
-        defaultFilers.querySelector("#r-today").checked = true;
-        break;
-      }
-    }
-    myApp.controllers.affichage.updateLists();
-  },
+  }
 };
