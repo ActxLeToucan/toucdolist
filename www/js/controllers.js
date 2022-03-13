@@ -122,7 +122,7 @@ myApp.controllers = {
       const titre = page.getElementById("titre").value.trim();
       const description = page.getElementById("description").value.trim();
       const myday = page.getElementById('myday').checked;
-      const categorie = page.querySelector("#select-categ").querySelector("select").value;
+      const categorie = page.querySelector("#select-categ").querySelector("select").value === "aucune" ? "" : page.querySelector("#select-categ").querySelector("select").value;
       const highlight = page.querySelector('.highlight-checkbox').checked;
       const urgent = page.querySelector('.urgent-checkbox').checked;
       const echeance = page.querySelector('.echeance').value;
