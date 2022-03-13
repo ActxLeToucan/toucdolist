@@ -64,3 +64,12 @@ label {
     width: 6em;
     height: 3em;
 }
+
+#search > .center {
+    background: none;
+}
+
+#search-input {
+    display: block;
+    margin: 25px 15px 0;
+}

@@ -284,6 +284,10 @@ myApp.services = {
               }
               break;
             }
+            case SEARCH: {
+              if (FILTER.search && data.title.toLowerCase().includes(FILTER.search.toLowerCase())) myApp.services.tasks.generate.task(data, false);
+              break;
+            }
           }
         });
       },
@@ -324,6 +328,10 @@ myApp.services = {
 
               if (data.myday === dateFormatted)
                 myApp.services.tasks.generate.task(data, true);
+              break;
+            }
+            case SEARCH: {
+              if (FILTER.search && data.title.toLowerCase().includes(FILTER.search.toLowerCase())) myApp.services.tasks.generate.task(data, true);
               break;
             }
           }

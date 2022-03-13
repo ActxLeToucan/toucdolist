@@ -10,10 +10,12 @@ const ALL_CATEGS = "all_categs";
 const PLANNED = "with_echeance";
 const URGENT = "urgent";
 const MYDAY = "myday";
+const SEARCH = "search";
 
 let FILTER = {
   type: MYDAY,
-  category: null
+  category: null,
+  search: null
 };
 
 let lastDelClicked = null;
@@ -36,6 +38,7 @@ myApp.controllers = {
       document.querySelector("#default-category-list").querySelectorAll("ons-radio").forEach(radio => {
         radio.onchange = myApp.controllers.filter.eventHandler;
       });
+      document.querySelector("#search-input").oninput = () => myApp.controllers.filter.set(SEARCH);
 
       document.querySelector('#button-settings').onclick = () => {
         document.querySelector('#myNavigator').pushPage('html/settings.html').then(myApp.controllers.affichage.updateSettings);
@@ -103,7 +106,7 @@ myApp.controllers = {
       document.querySelector('#stats-completed').querySelector(".stats-number").innerText = myApp.services.data.tasks.completed.length;
       document.querySelector('#stats-late').querySelector(".stats-number").innerText = myApp.services.tasks.late();
       let tasksInCategs = myApp.services.data.categories.reduce((prev, curr) => prev + myApp.services.categories.tasks(curr.name), 0);
-      document.querySelector('#stats-avg-tasks-in-categs').querySelector(".stats-number").innerText = myApp.services.data.categories.length > 0 ? (tasksInCategs / myApp.services.data.categories.length).toPrecision(2) : 0;
+      document.querySelector('#stats-avg-tasks-in-categs').querySelector(".stats-number").innerText = myApp.services.data.categories.length > 0 ? (tasksInCategs / myApp.services.data.categories.length).toFixed(1) : '0.0';
       let durations = myApp.services.data.tasks.completed.reduce((prev, curr) => prev + myApp.services.tasks.duration(curr), 0);
       document.querySelector("#stats-avg-time").querySelector(".stats-number").innerText = myApp.services.data.tasks.completed.length > 0 ? Math.ceil(durations / myApp.services.data.tasks.completed.length) : 0;
 
@@ -449,6 +452,7 @@ myApp.controllers = {
 
 
   filter: {
+    // onchange events handler
     eventHandler: (event) => {
       let categ = event.target.parentNode.parentNode.parentNode;
       if (categ.data) {
@@ -486,40 +490,54 @@ myApp.controllers = {
     set: (filter = NO_FILTER, categ = null) => {
       FILTER.type = filter;
       FILTER.category = categ;
+      FILTER.search = null;
       let defaultFilers = document.querySelector("#default-category-list");
       let title = document.querySelector("#tabbarPage").querySelector(".center");
       switch (FILTER.type) {
         case NO_FILTER: {
           title.innerText = "À faire";
+          defaultFilers.parentNode.querySelector("#search-input").value = "";
+          break;
+        }
+        case SEARCH: {
+          FILTER.search = defaultFilers.parentNode.querySelector("#search-input").value;
+          title.innerText = "Résultats de recherche";
+          defaultFilers.parentNode.querySelector("#r-search").checked = true;
           break;
         }
         case CATEG: {
           title.innerText = categ;
+          defaultFilers.parentNode.querySelector("#search-input").value = "";
           break;
         }
         case NO_CATEG: {
           title.innerText = "Sans catégorie";
           defaultFilers.querySelector("#r-no").checked = true;
+          defaultFilers.parentNode.querySelector("#search-input").value = "";
           break;
         }
         case ALL_CATEGS: {
           title.innerText = "Toutes les catégories";
           defaultFilers.querySelector("#r-all").checked = true;
+          defaultFilers.parentNode.querySelector("#search-input").value = "";
           break;
         }
         case PLANNED: {
           title.innerText = "📅 Planifié";
           defaultFilers.querySelector("#r-planned").checked = true;
+          defaultFilers.parentNode.querySelector("#search-input").value = "";
           break;
         }
         case URGENT: {
           title.innerText = "❗ Important";
           defaultFilers.querySelector("#r-urgent").checked = true;
+          defaultFilers.parentNode.querySelector("#search-input").value = "";
           break;
         }
         case MYDAY: {
           title.innerText = "🌞 Ma journée";
           defaultFilers.querySelector("#r-myday").checked = true;
+          defaultFilers.parentNode.querySelector("#search-input").value = "";
           break;
         }
       }
