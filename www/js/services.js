@@ -35,6 +35,11 @@ myApp.services = {tasks: {
         tab.find(task => task === data).highlight = !data.highlight;
       },
 
+      myday: (data, taskCompleted, inMyDay) => {
+        let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+        tab.find(task => task === data).myday = (inMyDay ? getDateInFormatYearMonthDate(new Date()) : "");
+      },
+
       priority: (data, taskCompleted) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).urgent = !data.urgent;
@@ -83,7 +88,8 @@ myApp.services = {tasks: {
 
       details: (task, taskCompleted) => {
         let dateTime = new Date(task.created);
-        let date = `Tâche créée le ${dateTime.getDate().toString().padStart(2, '0')}/${(dateTime.getMonth()+1).toString().padStart(2, '0')}/${dateTime.getFullYear()} à ${dateTime.getHours().toString().padStart(2, '0')}:${dateTime.getMinutes().toString().padStart(2, '0')}.`;
+        let taskDate = getDateInFormatDateMonthYear(dateTime, '/');
+        let dateFormatted = getDateInFormatYearMonthDate(new Date());
 
         let page = document.querySelector('#details-task-page-content');
         page.innerHTML = `
@@ -109,6 +115,10 @@ myApp.services = {tasks: {
                   <ons-button modifier="quiet" id="button-validate-descr">Valider ✅</ons-button>
               </div>
           </div>
+          <p>
+            <label for="myday">🌞 Ajouter à ma journée </label>
+            <ons-checkbox input-id="myday" class="myday-checkbox" ${task.myday === dateFormatted ? "checked" : ''}></ons-checkbox>
+          </p>
           <div id="categ"  style="margin-top: 20px; margin-bottom: 20px">
               <span style="vertical-align: sub">Catégorie </span>
               <ons-select id="select-categ">
@@ -127,7 +137,7 @@ myApp.services = {tasks: {
               <label for="echeance">Échéance </label>
               <ons-input input-id="echeance" class="echeance" type="date" modifier="underbar"></ons-input>
           </p>
-          <p class="task-created">${date}</p>
+          <p class="task-created">Tâche créée le ${taskDate} à ${dateTime.getHours().toString().padStart(2, '0')}:${dateTime.getMinutes().toString().padStart(2, '0')}.</p>
         `;
         page.querySelector(".echeance").value = task.echeance;
 
@@ -181,7 +191,9 @@ myApp.services = {tasks: {
           affichage.querySelector("#descr-content").innerText = newValue;
           myApp.controllers.tasks.edit.description(e, newValue);
         });
-        // modification de la catégorie
+        // modification ma journée
+        page.querySelector(".myday-checkbox").addEventListener("change", myApp.controllers.tasks.edit.myday);
+        // modification catégorie
         categSelector.addEventListener("change", myApp.controllers.tasks.edit.category);
         // modification surlignage
         page.querySelector(".highlight-checkbox").addEventListener("change", myApp.controllers.tasks.edit.highlight);
@@ -231,8 +243,20 @@ myApp.services = {tasks: {
               if (data.urgent) myApp.services.tasks.generate.task(data, false);
               break;
             }
-            case TODAY: {
-              //TODO
+            case MYDAY: {
+              /*
+                Dans ma journée :
+                 - tâches avec "ma journée" cochée aujourd'hui
+                 - tâches qui ne sont pas finies avec "ma journée" cochée avant aujourd'hui
+                 - tâches qui arrivent à échéance à aujourd'hui ou en retard
+               */
+              let date = new Date();
+              let dateFormatted = getDateInFormatYearMonthDate(date);
+
+              if ((data.myday && (data.myday === dateFormatted || new Date(data.myday) < date)) || (data.echeance && (data.echeance === dateFormatted || new Date(data.echeance) < date))) {
+                myApp.services.data.tasks.pending.find(t => t === data).myday = dateFormatted;
+                myApp.services.tasks.generate.task(data, false);
+              }
               break;
             }
           }
@@ -269,8 +293,12 @@ myApp.services = {tasks: {
               if (data.urgent) myApp.services.tasks.generate.task(data, true);
               break;
             }
-            case TODAY: {
-              //TODO
+            case MYDAY: {
+              let date = new Date();
+              let dateFormatted = getDateInFormatYearMonthDate(date);
+
+              if (data.myday === dateFormatted)
+                myApp.services.tasks.generate.task(data, true);
               break;
             }
           }
@@ -374,6 +402,7 @@ myApp.services = {tasks: {
           highlight: false,
           urgent: false,
           echeance: "2022-05-13",
+          myday: "",
           created: 1647077958676
         },
         {
@@ -383,6 +412,7 @@ myApp.services = {tasks: {
           highlight: true,
           urgent: true,
           echeance: "",
+          myday: "2022-03-10",
           created: 1647077958677
         },
         {
@@ -392,6 +422,7 @@ myApp.services = {tasks: {
           highlight: false,
           urgent: true,
           echeance: "",
+          myday: "",
           created: 1647077958678
         },
         {
@@ -401,6 +432,7 @@ myApp.services = {tasks: {
           highlight: true,
           urgent: false,
           echeance: "",
+          myday: "",
           created: 1647077958679
         },
         {
@@ -410,6 +442,7 @@ myApp.services = {tasks: {
           highlight: false,
           urgent: false,
           echeance: "",
+          myday: "",
           created: 1647077958680
         },
         {
@@ -419,6 +452,7 @@ myApp.services = {tasks: {
           highlight: false,
           urgent: false,
           echeance: "",
+          myday: "",
           created: 1647077958681
         },
         {
@@ -427,7 +461,8 @@ myApp.services = {tasks: {
           description: 'Some description.',
           highlight: false,
           urgent: false,
-          echeance: "",
+          echeance: "2022-03-12",
+          myday: "",
           created: 1647077958682
         },
         {
@@ -437,6 +472,7 @@ myApp.services = {tasks: {
           highlight: false,
           urgent: false,
           echeance: "",
+          myday: "2022-03-10",
           created: 1647077958683
         }
       ],
@@ -449,6 +485,7 @@ myApp.services = {tasks: {
           highlight: false,
           urgent: false,
           echeance: "",
+          myday: "2021-01-01",
           created: 1647000000000
         }
       ]

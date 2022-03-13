@@ -19,6 +19,10 @@
     <p>
       <ons-input id="description" modifier="underbar" placeholder="Description" float></ons-input>
     </p>
+    <p>
+      <label for="myday">🌞 Ajouter à ma journée </label>
+      <ons-checkbox input-id="myday" class="myday-checkbox"></ons-checkbox>
+    </p>
     <div id="categ"  style="margin-top: 20px; margin-bottom: 20px">
       <span style="vertical-align: sub">Catégorie </span>
       <ons-select id="select-categ">
@@ -34,7 +38,7 @@
       <ons-switch input-id="urgent" class="urgent-checkbox"></ons-switch>
     </p>
     <p>
-      <label for="echeancve">Échéance </label>
+      <label for="echeance">Échéance </label>
       <ons-input input-id="echeance" class="echeance" type="date" modifier="underbar"></ons-input>
     </p>
     <ons-if platform="ios other">

@@ -9,15 +9,23 @@ const NO_CATEG = "no_categ";
 const ALL_CATEGS = "all_categs";
 const PLANNED = "with_echeance";
 const URGENT = "urgent";
-const TODAY = "today";
+const MYDAY = "myday";
 
 let FILTER = {
-  type: TODAY,
+  type: MYDAY,
   category: null
 };
 
 let lastDelClicked = null;
 let nbClickDeleteCateg = 0;
+
+function getDateInFormatYearMonthDate(date, separator = '-') {
+  return `${date.getFullYear()}${separator}${(date.getMonth()+1).toString().padStart(2, '0')}${separator}${date.getDate().toString().padStart(2, '0')}`;
+}
+
+function getDateInFormatDateMonthYear(date, separator = '-') {
+  return `${date.getDate().toString().padStart(2, '0')}${separator}${(date.getMonth()+1).toString().padStart(2, '0')}${separator}${date.getFullYear()}`;
+}
 
 myApp.controllers = {
   tabbarPage: (page) => {
@@ -33,10 +41,32 @@ myApp.controllers = {
     Array.prototype.forEach.call(page.querySelectorAll('[component="button/new-task"]'), function(element) {
       element.onclick = function() {
         document.querySelector('#myNavigator').pushPage('html/new_task.html').then(() => {
-          let categSelector = document.querySelector("#select-categ").querySelector("select");
+          // application des paramètres par défaut à partir du filtre courant
+          let newTaskPage = document.querySelector('#newTaskPage');
+          switch (FILTER.type) {
+            case PLANNED: {
+              // planification par défaut à la date du jour
+              newTaskPage.querySelector('#echeance').value = getDateInFormatYearMonthDate(new Date());
+              break;
+            }
+            case URGENT: {
+              newTaskPage.querySelector('#urgent').checked = true;
+              break;
+            }
+            case MYDAY: {
+              newTaskPage.querySelector('#myday').checked = true;
+              break;
+            }
+            default: {
+              break;
+            }
+          }
+
+          // insertion des catégories
+          let categSelector = newTaskPage.querySelector("#select-categ").querySelector("select");
           myApp.services.data.categories.forEach(categ => {
             let elemCateg = ons.createElement(`
-              <option>${categ.name}</option>
+              <option ${categ.name === FILTER.category ? "selected" : ""}>${categ.name}</option>
             `);
 
             elemCateg.data = categ;
@@ -69,6 +99,7 @@ myApp.controllers = {
     add: (page) => {
       const titre = page.getElementById("titre").value.trim();
       const description = page.getElementById("description").value.trim();
+      const myday = page.getElementById('myday').checked;
       const categorie = page.querySelector("#select-categ").querySelector("select").value;
       const highlight = page.querySelector('.highlight-checkbox').checked;
       const urgent = page.querySelector('.urgent-checkbox').checked;
@@ -83,6 +114,7 @@ myApp.controllers = {
         highlight: highlight,
         urgent: urgent,
         echeance: echeance,
+        myday: (myday ? getDateInFormatYearMonthDate(new Date()) : ""),
         created: Date.now()
       };
       myApp.services.tasks.add(newTask)
@@ -142,7 +174,6 @@ myApp.controllers = {
 
       description: (event, newValue) => {
         let task = event.target.parentNode.parentNode.parentNode;
-        console.log(task);
         myApp.services.tasks.edit.description(task.data, task.completed, newValue);
         myApp.controllers.affichage.updateLists()
       },
@@ -150,6 +181,14 @@ myApp.controllers = {
       echeance: (event) => {
         let task = event.target.parentNode.parentNode.parentNode;
         myApp.services.tasks.edit.echeance(task.data, task.completed, event.target.value);
+
+        // une tache non terminée qui arrive à échéance aujourd'hui ou en retard est forcément dans "ma journée"
+        let date = new Date();
+        if (!task.completed && (task.data.echeance && (task.data.echeance === getDateInFormatYearMonthDate(date)) || new Date(task.data.echeance) < date)) {
+          task.querySelector('.myday-checkbox').checked = true;
+        }
+
+        myApp.controllers.affichage.updateLists();
       },
 
       priority: (event) => {
@@ -161,6 +200,19 @@ myApp.controllers = {
       highlight: (event) => {
         let task = event.target.parentNode.parentNode;
         myApp.services.tasks.edit.highlight(task.data, task.completed);
+        myApp.controllers.affichage.updateLists();
+      },
+
+      myday: (event) => {
+        let task = event.target.parentNode.parentNode.parentNode;
+
+        // une tache non terminée qui arrive à échéance aujourd'hui ou en retard est forcément dans "ma journée"
+        let date = new Date();
+        if (!task.completed && (task.data.echeance && (task.data.echeance === getDateInFormatYearMonthDate(date)) || new Date(task.data.echeance) < date)) {
+          event.target.checked = true;
+        }
+
+        myApp.services.tasks.edit.myday(task.data, task.completed, event.target.checked);
         myApp.controllers.affichage.updateLists();
       },
 
@@ -319,8 +371,8 @@ myApp.controllers = {
         myApp.controllers.filter.set(CATEG, categ.data.name);
       } else {
         switch (event.target.id) {
-          case "r-today": {
-            myApp.controllers.filter.set(TODAY);
+          case "r-myday": {
+            myApp.controllers.filter.set(MYDAY);
             break;
           }
           case "r-urgent": {
@@ -381,9 +433,9 @@ myApp.controllers = {
           defaultFilers.querySelector("#r-urgent").checked = true;
           break;
         }
-        case TODAY: {
+        case MYDAY: {
           title.innerText = "🌞 Ma journée";
-          defaultFilers.querySelector("#r-today").checked = true;
+          defaultFilers.querySelector("#r-myday").checked = true;
           break;
         }
       }
