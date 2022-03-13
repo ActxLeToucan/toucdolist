@@ -32,9 +32,14 @@ myApp.controllers = {
     // Set button functionality to open/close the menu.
     page.querySelector('[component="button/menu"]').onclick = function() {
       document.querySelector('#mySplitter').left.toggle();
+
       document.querySelector("#default-category-list").querySelectorAll("ons-radio").forEach(radio => {
-        radio.addEventListener("change", myApp.controllers.filter.eventHandler);
+        radio.onchange = myApp.controllers.filter.eventHandler;
       });
+
+      document.querySelector('#button-settings').onclick = () => {
+        document.querySelector('#myNavigator').pushPage('html/settings.html').then(myApp.controllers.affichage.updateSettings);
+      };
     };
 
     // Set button functionality to push 'new_task.html' page.
@@ -90,6 +95,20 @@ myApp.controllers = {
 
     updateCategories: () => {
       myApp.services.categories.show();
+    },
+
+    updateSettings: () => {
+      document.querySelector('#stats-categs').querySelector(".stats-number").innerText = myApp.services.data.categories.length;
+      document.querySelector('#stats-todo').querySelector(".stats-number").innerText = myApp.services.data.tasks.pending.length;
+      document.querySelector('#stats-completed').querySelector(".stats-number").innerText = myApp.services.data.tasks.completed.length;
+      document.querySelector('#stats-late').querySelector(".stats-number").innerText = myApp.services.tasks.late();
+      let tasksInCategs = myApp.services.data.categories.reduce((prev, curr) => prev + myApp.services.categories.tasks(curr.name), 0);
+      document.querySelector('#stats-avg-tasks-in-categs').querySelector(".stats-number").innerText = myApp.services.data.categories.length > 0 ? (tasksInCategs / myApp.services.data.categories.length).toPrecision(2) : 0;
+      let durations = myApp.services.data.tasks.completed.reduce((prev, curr) => prev + myApp.services.tasks.duration(curr), 0);
+      document.querySelector("#stats-avg-time").querySelector(".stats-number").innerText = myApp.services.data.tasks.completed.length > 0 ? Math.ceil(durations / myApp.services.data.tasks.completed.length) : 0;
+
+      document.querySelector('#button-delete-all-categs').onclick = myApp.controllers.categories.clear.createAlertDialog;
+      document.querySelector('#button-delete-all-tasks').onclick = myApp.controllers.tasks.clear.createAlertDialog;
     }
   },
 
@@ -115,12 +134,44 @@ myApp.controllers = {
         urgent: urgent,
         echeance: echeance,
         myday: (myday ? getDateInFormatYearMonthDate(new Date()) : ""),
-        created: Date.now()
+        created: Date.now(),
+        completed: ""
       };
       myApp.services.tasks.add(newTask)
       myApp.controllers.affichage.updateLists();
 
       document.querySelector('ons-navigator').popPage();
+    },
+
+    clear: {
+      createAlertDialog: () => {
+        let dialog = document.getElementById('alert-dialog-clear-tasks');
+
+        if (dialog) {
+          myApp.controllers.tasks.clear.showDialog(dialog);
+        } else {
+          ons.createElement('clear-tasks.html', { append: true })
+              .then(function (dialog) {
+                myApp.controllers.tasks.clear.showDialog(dialog);
+              });
+        }
+      },
+
+      showDialog: (dialog) => {
+        dialog.show();
+        dialog.childNodes[0].addEventListener("click", myApp.controllers.tasks.clear.hideAlertDialog);
+      },
+
+      hideAlertDialog: () => {
+        document.getElementById('alert-dialog-clear-tasks').hide();
+      },
+
+      clear: () => {
+        myApp.controllers.tasks.clear.hideAlertDialog();
+        myApp.services.tasks.clear();
+        myApp.controllers.affichage.updateSettings();
+        myApp.controllers.affichage.updateLists();
+      }
     },
 
     delete: {
@@ -154,6 +205,7 @@ myApp.controllers = {
         lastDelClicked.classList.add("animation-remove");
         myApp.controllers.tasks.delete.hideAlertDialog();
         myApp.services.tasks.delete(lastDelClicked.data, lastDelClicked.querySelector("ons-checkbox").checked);
+        myApp.controllers.affichage.updateSettings();
       }
     },
 
@@ -344,6 +396,38 @@ myApp.controllers = {
         }
       }
     },
+
+  clear: {
+    createAlertDialog: () => {
+      let dialog = document.getElementById('alert-dialog-clear-categories');
+
+      if (dialog) {
+        myApp.controllers.categories.clear.showDialog(dialog);
+      } else {
+        ons.createElement('clear-categories.html', { append: true })
+            .then(function (dialog) {
+              myApp.controllers.categories.clear.showDialog(dialog);
+            });
+      }
+    },
+
+    showDialog: (dialog) => {
+      dialog.show();
+      dialog.childNodes[0].addEventListener("click", myApp.controllers.categories.clear.hideAlertDialog);
+    },
+
+    hideAlertDialog: () => {
+      document.getElementById('alert-dialog-clear-categories').hide();
+    },
+
+    clear: () => {
+      myApp.controllers.categories.clear.hideAlertDialog();
+      myApp.services.categories.clear();
+      myApp.controllers.affichage.updateSettings();
+      myApp.controllers.affichage.updateCategories();
+      myApp.controllers.affichage.updateLists();
+    }
+  },
 
     delete: (event) => {
       let data = event.target.parentNode.parentNode.parentNode.parentNode.data;

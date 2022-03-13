@@ -4,14 +4,28 @@
  * Seul le contrôleur doit appeler les méthodes de services. Donc lors d'un évènement, l'action est déclenchée dans le contrôleur.
  */
 
-myApp.services = {tasks: {
+myApp.services = {
+  tasks: {
     add: (data) => {
       myApp.services.data.tasks.pending.push(data);
+    },
+
+    clear: () => {
+      myApp.services.data.tasks.pending = [];
+      myApp.services.data.tasks.completed = [];
     },
 
     delete: (data, taskCompleted) => {
       let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
       tab.splice(tab.indexOf(data), 1);
+    },
+
+    duration: (data) => {
+      let task = myApp.services.data.tasks.completed.find(t => t === data);
+      let dateCreated = new Date(task.created);
+      let dateCompleted = new Date(task.completed);
+      let diffTime = Math.abs(dateCompleted - dateCreated);
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     },
 
     edit: {
@@ -204,10 +218,21 @@ myApp.services = {tasks: {
       }
     },
 
+    late: () => {
+      let late = 0
+      myApp.services.data.tasks.pending.forEach(task => {
+        if (task.echeance && (new Date(task.echeance) < new Date())) late++;
+      });
+      myApp.services.data.tasks.completed.forEach(task => {
+        if (task.echeance && (new Date(task.echeance) < new Date())) late++;
+      });
+      return late;
+    },
+
     setState: (data, taskCompleted) => {
       let tab1 = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
       let tab2 = (!taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
-
+      data.completed = (taskCompleted ? getDateInFormatYearMonthDate(new Date()) : '');
       tab1.push(data);
       tab2.splice(tab2.indexOf(data), 1);
     },
@@ -318,6 +343,12 @@ myApp.services = {tasks: {
       });
     },
 
+    clear: () => {
+      myApp.services.data.tasks.pending.forEach(task => task.category = '');
+      myApp.services.data.tasks.completed.forEach(task => task.category = '');
+      myApp.services.data.categories = [];
+    },
+
     delete: (data) => {
       myApp.services.data.tasks.pending.forEach(task => {
         if (task.category === data.name) {
@@ -387,6 +418,17 @@ myApp.services = {tasks: {
       myApp.services.data.categories.forEach(categ => {
         myApp.services.categories.generate(categ);
       });
+    },
+
+    tasks: (categoryName) => {
+      let nbTasks = myApp.services.data.tasks.pending.reduce((prev, curr) => {
+        return prev + (curr.category === categoryName ? 1 : 0);
+      }, 0);
+      nbTasks += myApp.services.data.tasks.completed.reduce((prev, curr) => {
+        return prev + (curr.category === categoryName ? 1 : 0);
+      }, 0);
+
+      return nbTasks;
     }
   },
 
@@ -403,7 +445,8 @@ myApp.services = {tasks: {
           urgent: false,
           echeance: "2022-05-13",
           myday: "",
-          created: 1647077958676
+          created: 1647077958676,
+          completed: ""
         },
         {
           title: 'Install Monaca CLI',
@@ -413,7 +456,8 @@ myApp.services = {tasks: {
           urgent: true,
           echeance: "",
           myday: "2022-03-10",
-          created: 1647077958677
+          created: 1647077958677,
+          completed: ""
         },
         {
           title: 'Star Onsen UI repo on Github',
@@ -423,7 +467,8 @@ myApp.services = {tasks: {
           urgent: true,
           echeance: "",
           myday: "",
-          created: 1647077958678
+          created: 1647077958678,
+          completed: ""
         },
         {
           title: 'Register in the community forum',
@@ -433,7 +478,8 @@ myApp.services = {tasks: {
           urgent: false,
           echeance: "",
           myday: "",
-          created: 1647077958679
+          created: 1647077958679,
+          completed: ""
         },
         {
           title: 'Send donations to Fran and Andreas',
@@ -443,7 +489,8 @@ myApp.services = {tasks: {
           urgent: false,
           echeance: "",
           myday: "",
-          created: 1647077958680
+          created: 1647077958680,
+          completed: ""
         },
         {
           title: 'Profit',
@@ -453,7 +500,8 @@ myApp.services = {tasks: {
           urgent: false,
           echeance: "",
           myday: "",
-          created: 1647077958681
+          created: 1647077958681,
+          completed: ""
         },
         {
           title: 'Visit Japan',
@@ -463,7 +511,8 @@ myApp.services = {tasks: {
           urgent: false,
           echeance: "2022-03-12",
           myday: "",
-          created: 1647077958682
+          created: 1647077958682,
+          completed: ""
         },
         {
           title: 'Enjoy an Onsen with Onsen UI team',
@@ -473,7 +522,8 @@ myApp.services = {tasks: {
           urgent: false,
           echeance: "",
           myday: "2022-03-10",
-          created: 1647077958683
+          created: 1647077958683,
+          completed: ""
         }
       ],
 
@@ -486,7 +536,8 @@ myApp.services = {tasks: {
           urgent: false,
           echeance: "",
           myday: "2021-01-01",
-          created: 1647000000000
+          created: 1647000000000,
+          completed: "2022-01-01"
         }
       ]
     },

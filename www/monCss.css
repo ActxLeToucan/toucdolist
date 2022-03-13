@@ -21,6 +21,14 @@
     margin-left: auto;
 }
 
+#button-settings {
+    margin-top: 30px;
+}
+
+#author {
+    margin-top: 0;
+}
+
 .task-created {
     margin-top: 50px;
     color: #6d6d72;
@@ -29,4 +37,30 @@
 
 label {
     vertical-align: middle;
+}
+
+#settings-content > div {
+    margin-bottom: 50px;
+}
+
+#settings-delete ons-button {
+    background-color: red;
+    margin-bottom: 10px;
+}
+
+.stats-item {
+    margin: 10px 15px 0;
+    display: inline-block;
+    vertical-align: bottom;
+}
+
+.stats-number {
+    margin: 0;
+    font-size: 2em;
+}
+
+.stats-title {
+    margin: 0 auto;
+    width: 6em;
+    height: 3em;
 }

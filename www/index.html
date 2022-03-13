@@ -68,7 +68,7 @@
             <ons-tabbar id="myTabbar" position="auto">
                 <ons-tab page="html/pending_tasks.html" label="En attente" active onclick="myApp.controllers.affichage.updateLists()">
                 </ons-tab>
-                <ons-tab page="html/completed_tasks.html" label="Finies" onclick="myApp.controllers.affichage.updateLists()">
+                <ons-tab page="html/completed_tasks.html" label="Terminées" onclick="myApp.controllers.affichage.updateLists()">
                 </ons-tab>
             </ons-tabbar>
         </ons-page>
@@ -116,6 +116,32 @@
             <div class="alert-dialog-footer">
                 <ons-alert-dialog-button id="button-alert-edit-categ">Valider</ons-alert-dialog-button>
                 <ons-alert-dialog-button id="button-alert-delete-categ" style="color: red">Supprimer</ons-alert-dialog-button>
+            </div>
+        </ons-alert-dialog>
+    </template>
+
+    <template id="clear-tasks.html">
+        <ons-alert-dialog id="alert-dialog-clear-tasks" modifier="rowfooter">
+            <div class="alert-dialog-title">Attention</div>
+            <div class="alert-dialog-content">
+                Voulez-vous vraiment supprimer toutes les tâches ?<br />Cette action est irréversible.
+            </div>
+            <div class="alert-dialog-footer">
+                <ons-alert-dialog-button onclick="window.myApp.controllers.tasks.clear.hideAlertDialog()">Annuler</ons-alert-dialog-button>
+                <ons-alert-dialog-button style="color: red" onclick="window.myApp.controllers.tasks.clear.clear()">Supprimer</ons-alert-dialog-button>
+            </div>
+        </ons-alert-dialog>
+    </template>
+
+    <template id="clear-categories.html">
+        <ons-alert-dialog id="alert-dialog-clear-categories" modifier="rowfooter">
+            <div class="alert-dialog-title">Attention</div>
+            <div class="alert-dialog-content">
+                Voulez-vous vraiment supprimer toutes les catégories ? Les tâches ne seront pas supprimées.<br />Cette action est irréversible.
+            </div>
+            <div class="alert-dialog-footer">
+                <ons-alert-dialog-button onclick="window.myApp.controllers.categories.clear.hideAlertDialog()">Annuler</ons-alert-dialog-button>
+                <ons-alert-dialog-button style="color: red" onclick="window.myApp.controllers.categories.clear.clear()">Supprimer</ons-alert-dialog-button>
             </div>
         </ons-alert-dialog>
     </template>
