@@ -230,7 +230,7 @@ myApp.controllers = {
     },
 
     details: (event) => {
-      let task = event.target.parentNode;
+      let task = (event.target.localName === "div" ? event.target.parentNode : event.target.parentNode.parentNode);
       document.querySelector('ons-navigator').pushPage('html/details_task.html').then(() =>
           myApp.services.tasks.generate.details(task.data, task.querySelector("ons-checkbox").checked)
       );
