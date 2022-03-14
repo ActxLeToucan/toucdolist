@@ -101,6 +101,7 @@ myApp.controllers = {
     },
 
     updateSettings: () => {
+      // stats
       document.querySelector('#stats-categs').querySelector(".stats-number").innerText = myApp.services.data.categories.length;
       document.querySelector('#stats-todo').querySelector(".stats-number").innerText = myApp.services.data.tasks.pending.length;
       document.querySelector('#stats-completed').querySelector(".stats-number").innerText = myApp.services.data.tasks.completed.length;
@@ -110,6 +111,21 @@ myApp.controllers = {
       let durations = myApp.services.data.tasks.completed.reduce((prev, curr) => prev + myApp.services.tasks.duration(curr), 0);
       document.querySelector("#stats-avg-time").querySelector(".stats-number").innerText = myApp.services.data.tasks.completed.length > 0 ? Math.ceil(durations / myApp.services.data.tasks.completed.length) : 0;
 
+      // search
+      let includeDescr = document.querySelector("#search-include-descr");
+      let includeSubTasks = document.querySelector("#search-include-subtasks");
+      includeDescr.checked = myApp.services.data.settings.search.includeDescription;
+      includeSubTasks.checked = myApp.services.data.settings.search.includeSubTasks;
+      includeDescr.onchange = () => {
+        myApp.services.settings.search.changeIncludeDescription();
+        myApp.controllers.affichage.updateLists();
+      }
+      includeSubTasks.onchange = () => {
+        myApp.services.settings.search.changeIncludeSubTasks();
+        myApp.controllers.affichage.updateLists();
+      }
+
+      // clear
       document.querySelector('#button-delete-all-categs').onclick = myApp.controllers.categories.clear.createAlertDialog;
       document.querySelector('#button-delete-all-tasks').onclick = myApp.controllers.tasks.clear.createAlertDialog;
     }
@@ -138,7 +154,8 @@ myApp.controllers = {
         echeance: echeance,
         myday: (myday ? getDateInFormatYearMonthDate(new Date()) : ""),
         created: Date.now(),
-        completed: ""
+        completed: "",
+        children: []
       };
       myApp.services.tasks.add(newTask)
       myApp.controllers.affichage.updateLists();
@@ -279,6 +296,29 @@ myApp.controllers = {
         } else {
           task.classList.add("animation-swipe-left");
           myApp.services.tasks.setState(task.data, false);
+        }
+      },
+
+      subTasks: {
+        add: (event) => {
+
+        },
+
+        edit: {
+          state: (event) => {
+            let subTask = event.target.parentNode.parentNode.parentNode;
+            let task = subTask.parentNode.parentNode;
+            myApp.services.tasks.edit.subTasks.setState(task.data, task.completed, subTask.data);
+            myApp.controllers.affichage.updateLists();
+          },
+
+          title: (event) => {
+
+          }
+        },
+
+        delete: (event) => {
+
         }
       },
 

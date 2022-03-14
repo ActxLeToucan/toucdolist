@@ -59,6 +59,30 @@ myApp.services = {
         tab.find(task => task === data).urgent = !data.urgent;
       },
 
+      subTasks: {
+        add: (data, taskCompleted, subTask) => {
+          let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+          tab.find(task => task === data).children.push(subTask);
+        },
+
+        delete: (data, taskCompleted, subTask) => {
+          let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+          tab.find(task => task === data).children.splice(tab.find(task => task === data).children.indexOf(subTask), 1);
+        },
+
+        edit: {
+          name: (data, taskCompleted, subTask, newTitle) => {
+            let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+            tab.find(task => task === data).children.find(s => s === subTask).title = newTitle;
+          }
+        },
+
+        setState: (data, taskCompleted, subTask) => {
+          let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
+          tab.find(task => task === data).children.find(s => s === subTask).completed = !tab.find(task => task === data).children.find(s => s === subTask).completed;
+        }
+      },
+
       title: (data, taskCompleted, newTitle) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).title = newTitle;
@@ -67,6 +91,7 @@ myApp.services = {
 
     generate: {
       task: (data, taskCompleted) => {
+        let subTasksCompleted = myApp.services.tasks.subTasksCompleted(data);
         let color = '#000000';
         if (data.category) {
           let categ = myApp.services.data.categories.find(categ => categ.name === data.category);
@@ -79,8 +104,9 @@ myApp.services = {
             <label class="left">
               <ons-checkbox ${taskCompleted ? "checked" : ""}></ons-checkbox>
             </label>
-            <div class="center ${data.urgent ? "task-prio" : ""}" style="color: ${color}">
-              ${data.title}
+            <div class="center" style="color: ${color}">
+              <span class="task-title ${data.urgent ? "task-prio" : ""}">${data.title}</span>
+              ${data.children.length > 0 ? `<span class="task-subtasks ${subTasksCompleted.completed ? "subtasks-completed" : ""}" style="${subTasksCompleted.completed ? `border-color: ${color}; background-color: ${color}` : `border-color: ${color}`}">${subTasksCompleted.ratio}</span>` : ''}
             </div>
             <div class="right">
               <ons-icon style="color: grey; padding-left: 4px" icon="ion-ios-trash-outline, material:md-delete"></ons-icon>
@@ -130,8 +156,8 @@ myApp.services = {
               </div>
           </div>
           <p>
-            <label for="myday">🌞 Ajouter à ma journée </label>
-            <ons-checkbox input-id="myday" class="myday-checkbox" ${task.myday === dateFormatted ? "checked" : ''}></ons-checkbox>
+              <label for="myday">🌞 Ajouter à ma journée </label>
+              <ons-checkbox input-id="myday" class="myday-checkbox" ${task.myday === dateFormatted ? "checked" : ''}></ons-checkbox>
           </p>
           <div id="categ"  style="margin-top: 20px; margin-bottom: 20px">
               <span style="vertical-align: sub">Catégorie </span>
@@ -151,6 +177,9 @@ myApp.services = {
               <label for="echeance">Échéance </label>
               <ons-input input-id="echeance" class="echeance" type="date" modifier="underbar"></ons-input>
           </p>
+          <div id="sub-tasks">
+              <p>SOUS-TÂCHES</p>
+          </div>
           <p class="task-created">Tâche créée le ${taskDate} à ${dateTime.getHours().toString().padStart(2, '0')}:${dateTime.getMinutes().toString().padStart(2, '0')}.</p>
         `;
         page.querySelector(".echeance").value = task.echeance;
@@ -159,7 +188,7 @@ myApp.services = {
         page.data = task;
         page.completed = taskCompleted;
 
-
+        // affichage categories
         let categSelector = page.querySelector("#select-categ").querySelector("select");
         myApp.services.data.categories.forEach(categ => {
           let elemCateg = ons.createElement(`
@@ -170,6 +199,26 @@ myApp.services = {
 
           categSelector.insertBefore(elemCateg, null);
         });
+
+        // affichage sous-tâches
+        let subTasks = page.querySelector("#sub-tasks");
+        task.children.forEach(subTask => {
+          let elemSubTask = ons.createElement(`
+            <ons-list-item class="sub-task-item">
+              <div class="center">
+                <ons-checkbox input-id="sub-task-item-${subTask.created}" class="sub-task-item-input" ${subTask.completed ? "checked" : ""}></ons-checkbox>
+              </div>
+              <label for="sub-task-item-${subTask.created}" class="center sub-task-item-label"> ${subTask.title}</label>
+              <div class="right">
+                <ons-icon style="color: grey; padding-left: 4px" icon="edit"></ons-icon>
+              </div>
+            </ons-list-item>
+          `);
+          elemSubTask.data = subTask;
+          elemSubTask.querySelector("ons-checkbox").addEventListener("change", myApp.controllers.tasks.edit.subTasks.edit.state);
+          subTasks.insertBefore(elemSubTask, null);
+        });
+
 
         // modification du titre
         page.querySelector("#button-edit-title").addEventListener("click", (e) => {
@@ -229,6 +278,15 @@ myApp.services = {
       return late;
     },
 
+    search: (data) => {
+      return FILTER.search
+          && (data.title.toLowerCase().includes(FILTER.search.toLowerCase()))
+          || (myApp.services.data.settings.search.includeDescription
+              && data.description.toLowerCase().includes(FILTER.search.toLowerCase()))
+          || (myApp.services.data.settings.search.includeSubTasks
+              && data.children.reduce((prev, curr) => prev + curr.title.toLowerCase().includes(FILTER.search.toLowerCase()) ? 1 : 0, 0) > 0);
+    },
+
     setState: (data, taskCompleted) => {
       let tab1 = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
       let tab2 = (!taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
@@ -285,7 +343,9 @@ myApp.services = {
               break;
             }
             case SEARCH: {
-              if (FILTER.search && data.title.toLowerCase().includes(FILTER.search.toLowerCase())) myApp.services.tasks.generate.task(data, false);
+              if (myApp.services.tasks.search(data)) {
+                myApp.services.tasks.generate.task(data, false);
+              }
               break;
             }
           }
@@ -331,13 +391,22 @@ myApp.services = {
               break;
             }
             case SEARCH: {
-              if (FILTER.search && data.title.toLowerCase().includes(FILTER.search.toLowerCase())) myApp.services.tasks.generate.task(data, true);
-              break;
+              if (myApp.services.tasks.search(data)) {
+                myApp.services.tasks.generate.task(data, true);
+              }
             }
           }
         });
       },
     },
+
+    subTasksCompleted: (task) => {
+      let completed = task.children.reduce((prev, curr) => prev + (curr.completed ? 1 : 0), 0);
+      return {
+        ratio: `${completed}/${task.children.length}`,
+        completed: (completed === task.children.length)
+      };
+    }
   },
 
 
@@ -441,6 +510,19 @@ myApp.services = {
   },
 
 
+  settings: {
+    search: {
+      changeIncludeDescription: () => {
+        myApp.services.data.settings.search.includeDescription = !myApp.services.data.settings.search.includeDescription;
+      },
+
+      changeIncludeSubTasks: () => {
+        myApp.services.data.settings.search.includeSubTasks = !myApp.services.data.settings.search.includeSubTasks;
+      }
+    }
+  },
+
+
 
   data: {
     tasks: {
@@ -454,7 +536,19 @@ myApp.services = {
           echeance: "2022-05-13",
           myday: "",
           created: 1647077958676,
-          completed: ""
+          completed: "",
+          children: [
+            {
+              title: "sub task",
+              completed: false,
+              created: 1647087958676
+            },
+            {
+              title: "another sub task",
+              completed: true,
+              created: 1647097958676
+            }
+          ]
         },
         {
           title: 'Install Monaca CLI',
@@ -465,7 +559,8 @@ myApp.services = {
           echeance: "",
           myday: "2022-03-10",
           created: 1647077958677,
-          completed: ""
+          completed: "",
+          children: []
         },
         {
           title: 'Star Onsen UI repo on Github',
@@ -476,7 +571,8 @@ myApp.services = {
           echeance: "",
           myday: "",
           created: 1647077958678,
-          completed: ""
+          completed: "",
+          children: []
         },
         {
           title: 'Register in the community forum',
@@ -487,7 +583,8 @@ myApp.services = {
           echeance: "",
           myday: "",
           created: 1647077958679,
-          completed: ""
+          completed: "",
+          children: []
         },
         {
           title: 'Send donations to Fran and Andreas',
@@ -498,7 +595,8 @@ myApp.services = {
           echeance: "",
           myday: "",
           created: 1647077958680,
-          completed: ""
+          completed: "",
+          children: []
         },
         {
           title: 'Profit',
@@ -509,7 +607,8 @@ myApp.services = {
           echeance: "",
           myday: "",
           created: 1647077958681,
-          completed: ""
+          completed: "",
+          children: []
         },
         {
           title: 'Visit Japan',
@@ -520,7 +619,8 @@ myApp.services = {
           echeance: "2022-03-12",
           myday: "",
           created: 1647077958682,
-          completed: ""
+          completed: "",
+          children: []
         },
         {
           title: 'Enjoy an Onsen with Onsen UI team',
@@ -531,7 +631,8 @@ myApp.services = {
           echeance: "",
           myday: "2022-03-10",
           created: 1647077958683,
-          completed: ""
+          completed: "",
+          children: []
         }
       ],
 
@@ -545,7 +646,8 @@ myApp.services = {
           echeance: "",
           myday: "2021-01-01",
           created: 1647000000000,
-          completed: "2022-01-01"
+          completed: "2022-01-01",
+          children: []
         }
       ]
     },
@@ -571,6 +673,13 @@ myApp.services = {
         color: "#00b725",
         created: 1647077958679
       }
-    ]
-  },
+    ],
+
+    settings: {
+      search: {
+        includeDescription: false,
+        includeSubTasks: false
+      }
+    }
+  }
 };
