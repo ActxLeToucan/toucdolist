@@ -216,8 +216,10 @@ myApp.services = {
           `);
           elemSubTask.data = subTask;
           elemSubTask.querySelector("ons-checkbox").addEventListener("change", myApp.controllers.tasks.edit.subTasks.edit.state);
+          elemSubTask.querySelector(".right").addEventListener("click", myApp.controllers.tasks.edit.subTasks.edit.createAlertDialog);
           subTasks.insertBefore(elemSubTask, null);
         });
+        subTasks.insertBefore(ons.createElement(`<ons-button id="button-new-categ" onclick="myApp.controllers.tasks.edit.subTasks.add.createAlertDialog()">Ajouter une sous-tâche</ons-button>`), null);
 
 
         // modification du titre

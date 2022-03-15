@@ -20,6 +20,7 @@ let FILTER = {
 
 let lastDelClicked = null;
 let nbClickDeleteCateg = 0;
+let nbClickDeleteSubtask = 0;
 
 function getDateInFormatYearMonthDate(date, separator = '-') {
   return `${date.getFullYear()}${separator}${(date.getMonth()+1).toString().padStart(2, '0')}${separator}${date.getDate().toString().padStart(2, '0')}`;
@@ -128,6 +129,10 @@ myApp.controllers = {
       // clear
       document.querySelector('#button-delete-all-categs').onclick = myApp.controllers.categories.clear.createAlertDialog;
       document.querySelector('#button-delete-all-tasks').onclick = myApp.controllers.tasks.clear.createAlertDialog;
+    },
+
+    updateDetails: (data, completed) => {
+      myApp.services.tasks.generate.details(data, completed);
     }
   },
 
@@ -232,7 +237,7 @@ myApp.controllers = {
     details: (event) => {
       let task = (event.target.localName === "div" ? event.target.parentNode : event.target.parentNode.parentNode);
       document.querySelector('ons-navigator').pushPage('html/details_task.html').then(() =>
-          myApp.services.tasks.generate.details(task.data, task.querySelector("ons-checkbox").checked)
+          myApp.controllers.affichage.updateDetails(task.data, task.querySelector("ons-checkbox").checked)
       );
     },
 
@@ -300,8 +305,50 @@ myApp.controllers = {
       },
 
       subTasks: {
-        add: (event) => {
+        add: {
+          createAlertDialog: () => {
+            let dialog = document.getElementById('alert-dialog-new-subtask');
 
+            if (dialog) {
+              myApp.controllers.tasks.edit.subTasks.add.showDialog(dialog);
+            } else {
+              ons.createElement('new-subtask.html', { append: true })
+                  .then(function (dialog) {
+                    myApp.controllers.tasks.edit.subTasks.add.showDialog(dialog);
+                  });
+            }
+          },
+
+          showDialog: (dialog) => {
+            dialog.show();
+            dialog.childNodes[0].addEventListener("click", myApp.controllers.tasks.edit.subTasks.add.hideAlertDialog);
+            dialog.querySelector('#button-cancel-new-subtask').addEventListener('click', myApp.controllers.tasks.edit.subTasks.add.hideAlertDialog);
+            dialog.querySelector('#button-alert-new-subtask').addEventListener('click', myApp.controllers.tasks.edit.subTasks.add.add);
+          },
+
+          hideAlertDialog: (event) => {
+            document.getElementById('alert-dialog-new-subtask').hide();
+            let input = event.target.parentNode.parentNode.querySelector('#input-new-subtask');
+            input.value = "";
+          },
+
+          add: (event) => {
+            let input = event.target.parentNode.parentNode.querySelector('#input-new-subtask');
+            let name = input.value.trim();
+            let task = document.querySelector("#details-task-page-content");
+
+            if (name) {
+              let subTask = {
+                title: name,
+                checked: false,
+                created: Date.now()
+              };
+              myApp.controllers.tasks.edit.subTasks.add.hideAlertDialog(event);
+              myApp.services.tasks.edit.subTasks.add(task.data, task.completed, subTask);
+              myApp.controllers.affichage.updateLists();
+              myApp.controllers.affichage.updateDetails(task.data, task.completed);
+            }
+          }
         },
 
         edit: {
@@ -312,13 +359,70 @@ myApp.controllers = {
             myApp.controllers.affichage.updateLists();
           },
 
-          title: (event) => {
+          createAlertDialog: (event) => {
+            let dialog = document.getElementById('alert-dialog-edit-subtask');
 
+            let data = (event.target.localName === "ons-icon" ? event.target.parentNode.parentNode : event.target.parentNode).data;
+
+            if (dialog) {
+              myApp.controllers.tasks.edit.subTasks.edit.showDialog(dialog, data);
+            } else {
+              ons.createElement('edit-subtask.html', { append: true })
+                  .then(function (dialog) {
+                    myApp.controllers.tasks.edit.subTasks.edit.showDialog(dialog, data);
+                  });
+            }
+          },
+
+          showDialog: (dialog, data) => {
+            dialog.show();
+            dialog.childNodes[0].addEventListener("click", myApp.controllers.tasks.edit.subTasks.edit.hideAlertDialog);
+
+            dialog.data = data;
+
+            dialog.querySelector('#input-edit-subtask').value = data.title;
+
+            dialog.querySelector('#button-alert-edit-subtask').addEventListener('click', myApp.controllers.tasks.edit.subTasks.edit.title);
+            dialog.querySelector('#button-alert-delete-subtask').addEventListener('click', myApp.controllers.tasks.edit.subTasks.delete);
+          },
+
+          hideAlertDialog: (event) => {
+            document.getElementById('alert-dialog-edit-subtask').hide();
+            let res = event.target.parentNode.parentNode.querySelector('.res-button');
+            res.innerText = "";
+            nbClickDeleteSubtask = 0;
+          },
+
+          title: (event) => {
+            let task = document.querySelector("#details-task-page-content");
+            let data = event.target.parentNode.parentNode.parentNode.parentNode.data;
+
+            let input = event.target.parentNode.parentNode.querySelector('#input-edit-subtask');
+            let name = input.value.trim();
+
+            if (name) {
+              myApp.controllers.tasks.edit.subTasks.edit.hideAlertDialog(event);
+              myApp.services.tasks.edit.subTasks.edit.name(task.data, task.completed, data, name);
+              myApp.controllers.affichage.updateLists();
+              myApp.controllers.affichage.updateDetails(task.data, task.completed);
+            }
           }
         },
 
         delete: (event) => {
+          let task = document.querySelector("#details-task-page-content");
+          let data = event.target.parentNode.parentNode.parentNode.parentNode.data;
+          let res = event.target.parentNode.parentNode.querySelector('.res-button');
 
+          if (nbClickDeleteSubtask === 0) {
+            res.innerText = "Cette action est irréversible.\nAppuyez à nouveau sur le bouton \"Supprimer\" pour confirmer.";
+            nbClickDeleteSubtask = 1;
+          } else {
+            myApp.controllers.tasks.edit.subTasks.edit.hideAlertDialog(event);
+            myApp.services.tasks.edit.subTasks.delete(task.data, task.completed, data);
+            myApp.controllers.affichage.updateLists();
+            myApp.controllers.affichage.updateDetails(task.data, task.completed);
+          }
         }
       },
 

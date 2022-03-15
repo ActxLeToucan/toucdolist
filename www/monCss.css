@@ -99,3 +99,7 @@ label {
 .sub-task-item-label {
     margin-left: 10px;
 }
+
+ons-list-item + #button-new-categ {
+    margin: 20px auto;
+}

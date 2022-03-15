@@ -146,6 +146,33 @@
         </ons-alert-dialog>
     </template>
 
+    <template id="new-subtask.html">
+        <ons-alert-dialog id="alert-dialog-new-subtask" modifier="rowfooter">
+            <div class="alert-dialog-title">Nouvelle sous-tâche</div>
+            <div class="alert-dialog-content">
+                <ons-input id="input-new-subtask" modifier="underbar" placeholder="Nom" float></ons-input>
+            </div>
+            <div class="alert-dialog-footer">
+                <ons-alert-dialog-button id="button-alert-new-subtask">Créer</ons-alert-dialog-button>
+                <ons-alert-dialog-button id="button-cancel-new-subtask">Annuler</ons-alert-dialog-button>
+            </div>
+        </ons-alert-dialog>
+    </template>
+
+    <template id="edit-subtask.html">
+        <ons-alert-dialog id="alert-dialog-edit-subtask" modifier="rowfooter">
+            <div class="alert-dialog-title">Édition de la sous-tâche</div>
+            <div class="alert-dialog-content">
+                <ons-input id="input-edit-subtask" modifier="underbar" placeholder="Nom" float></ons-input>
+                <p class="res-button" style="color: darkred"></p>
+            </div>
+            <div class="alert-dialog-footer">
+                <ons-alert-dialog-button id="button-alert-edit-subtask">Valider</ons-alert-dialog-button>
+                <ons-alert-dialog-button id="button-alert-delete-subtask" style="color: red">Supprimer</ons-alert-dialog-button>
+            </div>
+        </ons-alert-dialog>
+    </template>
+
 </body>
 
 </html>
