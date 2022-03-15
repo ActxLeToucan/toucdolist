@@ -2,6 +2,10 @@
     background-color: lightcoral !important;
 }
 
+.task-del .task-title {
+    color: white !important;
+}
+
 .task-del > div > ons-icon, .task-del {
     color: white !important;
 }
