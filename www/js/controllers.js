@@ -35,15 +35,6 @@ myApp.controllers = {
     // Set button functionality to open/close the menu.
     page.querySelector('[component="button/menu"]').onclick = function() {
       document.querySelector('#mySplitter').left.toggle();
-
-      document.querySelector("#default-category-list").querySelectorAll("ons-radio").forEach(radio => {
-        radio.onchange = myApp.controllers.filter.eventHandler;
-      });
-      document.querySelector("#search-input").oninput = () => myApp.controllers.filter.set(SEARCH);
-
-      document.querySelector('#button-settings').onclick = () => {
-        document.querySelector('#myNavigator').pushPage('html/settings.html').then(myApp.controllers.affichage.updateSettings);
-      };
     };
 
     // Set button functionality to push 'new_task.html' page.
@@ -88,6 +79,19 @@ myApp.controllers = {
       element.show && element.show(); // Fix ons-fab in Safari.
     });
   },
+
+  menuPage: (page) => {
+    page.querySelector("#default-category-list").querySelectorAll("ons-radio").forEach(radio => {
+      radio.onchange = myApp.controllers.filter.eventHandler;
+    });
+    page.querySelector("#search-input").oninput = () => myApp.controllers.filter.set(SEARCH);
+
+    page.querySelector('#button-settings').onclick = () => {
+      document.querySelector('#myNavigator').pushPage('html/settings.html').then(myApp.controllers.affichage.updateSettings);
+    };
+  },
+
+
 
 
 
