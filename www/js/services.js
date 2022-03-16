@@ -556,7 +556,7 @@ myApp.services = {
 
   storage: {
     load: () => {
-      myApp.services.data.tasks = JSON.parse(localStorage.getItem("tasks")) ?? [];
+      myApp.services.data.tasks = JSON.parse(localStorage.getItem("tasks")) ?? {pending:[], completed:[]};
       myApp.services.data.categories = JSON.parse(localStorage.getItem("categories")) ?? [];
       myApp.services.data.settings = JSON.parse(localStorage.getItem("settings")) ?? {search: {includeDescription: false, includeSubTasks: false}};
     },
@@ -756,3 +756,5 @@ myApp.services = {
     }
   }
 };
+
+myApp.services.storage.load();
