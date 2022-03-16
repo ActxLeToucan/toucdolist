@@ -2,6 +2,7 @@
 window.myApp = {};
 
 document.addEventListener('init', function(event) {
+  myApp.services.storage.load();
   let page = event.target;
 
   // Each page calls its own initialization controller.

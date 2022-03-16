@@ -130,6 +130,14 @@ myApp.controllers = {
         myApp.controllers.affichage.updateLists();
       }
 
+      // mode demo
+      document.querySelector('#button-demo').onclick = () => {
+        myApp.services.loadDemo();
+        myApp.controllers.affichage.updateLists();
+        myApp.controllers.affichage.updateCategories();
+        myApp.controllers.affichage.updateSettings();
+      }
+
       // clear
       document.querySelector('#button-delete-all-categs').onclick = myApp.controllers.categories.clear.createAlertDialog;
       document.querySelector('#button-delete-all-tasks').onclick = myApp.controllers.tasks.clear.createAlertDialog;

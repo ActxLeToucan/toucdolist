@@ -8,16 +8,19 @@ myApp.services = {
   tasks: {
     add: (data) => {
       myApp.services.data.tasks.pending.push(data);
+      myApp.services.storage.save.tasks();
     },
 
     clear: () => {
       myApp.services.data.tasks.pending = [];
       myApp.services.data.tasks.completed = [];
+      myApp.services.storage.save.tasks();
     },
 
     delete: (data, taskCompleted) => {
       let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
       tab.splice(tab.indexOf(data), 1);
+      myApp.services.storage.save.tasks();
     },
 
     duration: (data) => {
@@ -32,60 +35,71 @@ myApp.services = {
       category: (data, taskCompleted, newCateg) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).category = newCateg;
+        myApp.services.storage.save.tasks();
       },
 
       description: (data, taskCompleted, newDescription) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).description = newDescription;
+        myApp.services.storage.save.tasks();
       },
 
       echeance: (data, taskCompleted, newEcheance) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).echeance = newEcheance;
+        myApp.services.storage.save.tasks();
       },
 
       highlight: (data, taskCompleted) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).highlight = !data.highlight;
+        myApp.services.storage.save.tasks();
       },
 
       myday: (data, taskCompleted, inMyDay) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).myday = (inMyDay ? getDateInFormatYearMonthDate(new Date()) : "");
+        myApp.services.storage.save.tasks();
       },
 
       priority: (data, taskCompleted) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).urgent = !data.urgent;
+        myApp.services.storage.save.tasks();
       },
 
       subTasks: {
         add: (data, taskCompleted, subTask) => {
           let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
           tab.find(task => task === data).children.push(subTask);
+          myApp.services.storage.save.tasks();
         },
 
         delete: (data, taskCompleted, subTask) => {
           let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
           tab.find(task => task === data).children.splice(tab.find(task => task === data).children.indexOf(subTask), 1);
+          myApp.services.storage.save.tasks();
         },
 
         edit: {
           name: (data, taskCompleted, subTask, newTitle) => {
             let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
             tab.find(task => task === data).children.find(s => s === subTask).title = newTitle;
+            myApp.services.storage.save.tasks();
           }
         },
 
         setState: (data, taskCompleted, subTask) => {
           let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
           tab.find(task => task === data).children.find(s => s === subTask).completed = !tab.find(task => task === data).children.find(s => s === subTask).completed;
+          myApp.services.storage.save.tasks();
         }
       },
 
       title: (data, taskCompleted, newTitle) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).title = newTitle;
+        myApp.services.storage.save.tasks();
       },
     },
 
@@ -295,6 +309,7 @@ myApp.services = {
       data.completed = (taskCompleted ? getDateInFormatYearMonthDate(new Date()) : '');
       tab1.push(data);
       tab2.splice(tab2.indexOf(data), 1);
+      myApp.services.storage.save.tasks();
     },
 
     show: {
@@ -420,12 +435,14 @@ myApp.services = {
         color: color,
         created: Date.now()
       });
+      myApp.services.storage.save.categories();
     },
 
     clear: () => {
       myApp.services.data.tasks.pending.forEach(task => task.category = '');
       myApp.services.data.tasks.completed.forEach(task => task.category = '');
       myApp.services.data.categories = [];
+      myApp.services.storage.save.categories();
     },
 
     delete: (data) => {
@@ -440,6 +457,7 @@ myApp.services = {
         }
       });
       myApp.services.data.categories.splice(myApp.services.data.categories.indexOf(data), 1);
+      myApp.services.storage.save.categories();
     },
 
     edit: (data, name, color) => {
@@ -455,6 +473,7 @@ myApp.services = {
       });
       myApp.services.data.categories.find(categ => categ === data).name = name;
       myApp.services.data.categories.find(categ => categ === data).color = color;
+      myApp.services.storage.save.categories();
     },
 
     generate: (data) => {
@@ -516,10 +535,46 @@ myApp.services = {
     search: {
       changeIncludeDescription: () => {
         myApp.services.data.settings.search.includeDescription = !myApp.services.data.settings.search.includeDescription;
+        myApp.services.storage.save.settings();
       },
 
       changeIncludeSubTasks: () => {
         myApp.services.data.settings.search.includeSubTasks = !myApp.services.data.settings.search.includeSubTasks;
+        myApp.services.storage.save.settings();
+      }
+    }
+  },
+
+
+  loadDemo: () => {
+    myApp.services.data = JSON.parse(JSON.stringify(myApp.services.defaultData));
+    myApp.services.storage.save.tasks();
+    myApp.services.storage.save.categories();
+    myApp.services.storage.save.settings();
+  },
+
+
+  storage: {
+    load: () => {
+      myApp.services.data.tasks = JSON.parse(localStorage.getItem("tasks")) ?? [];
+      myApp.services.data.categories = JSON.parse(localStorage.getItem("categories")) ?? [];
+      myApp.services.data.settings = JSON.parse(localStorage.getItem("settings")) ?? {search: {includeDescription: false, includeSubTasks: false}};
+    },
+
+    save: {
+      tasks: () => {
+        localStorage.removeItem("tasks");
+        localStorage.setItem("tasks", JSON.stringify(myApp.services.data.tasks));
+      },
+
+      categories: () => {
+        localStorage.removeItem("categories");
+        localStorage.setItem("categories", JSON.stringify(myApp.services.data.categories));
+      },
+
+      settings: () => {
+        localStorage.removeItem("settings");
+        localStorage.setItem("settings", JSON.stringify(myApp.services.data.settings));
       }
     }
   },
@@ -527,6 +582,22 @@ myApp.services = {
 
 
   data: {
+    tasks: {
+      pending: [],
+      completed: []
+    },
+    categories: [],
+    settings: {
+      search: {
+        includeDescription: false,
+        includeSubTasks: false
+      }
+    }
+  },
+
+
+
+  defaultData: {
     tasks: {
       pending: [
         {
