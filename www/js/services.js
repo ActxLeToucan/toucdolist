@@ -120,7 +120,7 @@ myApp.services = {
             </label>
             <div class="center" style="color: ${color}">
               <span class="task-title ${data.urgent ? "task-prio" : ""}">${data.title}</span>
-              ${data.children.length > 0 ? `<span class="task-subtasks ${subTasksCompleted.completed ? "subtasks-completed" : ""}" style="${subTasksCompleted.completed ? `border-color: ${color}; background-color: ${color}` : `border-color: ${color}`}">${subTasksCompleted.ratio}</span>` : ''}
+              ${data.children.length > 0 ? `<span class="task-subtasks ${subTasksCompleted.completed ? "subtasks-completed" : ""}" style="${subTasksCompleted.completed ? `border-color: ${color}; background-color: ${color}` : `border-color: ${color}`}">${subTasksCompleted.stringRatio}</span>` : ''}
             </div>
             <div class="right">
               <ons-icon style="color: grey; padding-left: 4px" icon="ion-ios-trash-outline, material:md-delete"></ons-icon>
@@ -137,7 +137,7 @@ myApp.services = {
 
         // Insert urgent tasks at the top and non urgent tasks at the bottom.
         let list = (taskCompleted ? document.querySelector('#completed-list') : document.querySelector('#pending-list'));
-        list.insertBefore(taskItem, taskItem.data.urgent ? list.firstChild : null);
+        list.insertBefore(taskItem, null);
       },
 
       details: (task, taskCompleted) => {
@@ -317,33 +317,37 @@ myApp.services = {
         let pendingList = document.querySelector('#pending-list');
         pendingList.innerHTML = "";
 
+        myApp.services.data.tasks.pending.sort(ORDER.type);
+        if (!ORDER.croissant) myApp.services.data.tasks.pending.reverse();
+        if (ORDER.urgentBefore) myApp.services.data.tasks.pending.sort(ORDER_URGENT);
+
         myApp.services.data.tasks.pending.forEach(function (data) {
           switch (FILTER.type) {
-            case NO_FILTER: {
+            case FILTER_NO: {
               myApp.services.tasks.generate.task(data, false);
               break;
             }
-            case CATEG: {
+            case FILTER_CATEG: {
               if (FILTER.category && data.category === FILTER.category) myApp.services.tasks.generate.task(data, false);
               break;
             }
-            case NO_CATEG: {
+            case FILTER_NO_CATEG: {
               if (data.category === '') myApp.services.tasks.generate.task(data, false);
               break;
             }
-            case ALL_CATEGS: {
+            case FILTER_ALL_CATEGS: {
               if (data.category !== '') myApp.services.tasks.generate.task(data, false);
               break;
             }
-            case PLANNED: {
+            case FILTER_PLANNED: {
               if (data.echeance !== '') myApp.services.tasks.generate.task(data, false);
               break;
             }
-            case URGENT: {
+            case FILTER_URGENT: {
               if (data.urgent) myApp.services.tasks.generate.task(data, false);
               break;
             }
-            case MYDAY: {
+            case FILTER_MYDAY: {
               /*
                 Dans ma journée :
                  - tâches avec "ma journée" cochée aujourd'hui
@@ -359,7 +363,7 @@ myApp.services = {
               }
               break;
             }
-            case SEARCH: {
+            case FILTER_SEARCH: {
               if (myApp.services.tasks.search(data)) {
                 myApp.services.tasks.generate.task(data, false);
               }
@@ -373,33 +377,37 @@ myApp.services = {
         let completedTasksPage = document.querySelector('#completed-list');
         completedTasksPage.innerHTML = "";
 
+        myApp.services.data.tasks.completed.sort(ORDER.type);
+        if (!ORDER.croissant) myApp.services.data.tasks.completed.reverse();
+        if (ORDER.urgentBefore) myApp.services.data.tasks.completed.sort(ORDER_URGENT);
+
         myApp.services.data.tasks.completed.forEach(function (data) {
           switch (FILTER.type) {
-            case NO_FILTER: {
+            case FILTER_NO: {
               myApp.services.tasks.generate.task(data, true);
               break;
             }
-            case CATEG: {
+            case FILTER_CATEG: {
               if (FILTER.category && data.category === FILTER.category) myApp.services.tasks.generate.task(data, true);
               break;
             }
-            case NO_CATEG: {
+            case FILTER_NO_CATEG: {
               if (data.category === '') myApp.services.tasks.generate.task(data, true);
               break;
             }
-            case ALL_CATEGS: {
+            case FILTER_ALL_CATEGS: {
               if (data.category !== '') myApp.services.tasks.generate.task(data, true);
               break;
             }
-            case PLANNED: {
+            case FILTER_PLANNED: {
               if (data.echeance !== '') myApp.services.tasks.generate.task(data, true);
               break;
             }
-            case URGENT: {
+            case FILTER_URGENT: {
               if (data.urgent) myApp.services.tasks.generate.task(data, true);
               break;
             }
-            case MYDAY: {
+            case FILTER_MYDAY: {
               let date = new Date();
               let dateFormatted = getDateInFormatYearMonthDate(date);
 
@@ -407,7 +415,7 @@ myApp.services = {
                 myApp.services.tasks.generate.task(data, true);
               break;
             }
-            case SEARCH: {
+            case FILTER_SEARCH: {
               if (myApp.services.tasks.search(data)) {
                 myApp.services.tasks.generate.task(data, true);
               }
@@ -420,8 +428,9 @@ myApp.services = {
     subTasksCompleted: (task) => {
       let completed = task.children.reduce((prev, curr) => prev + (curr.completed ? 1 : 0), 0);
       return {
-        ratio: `${completed}/${task.children.length}`,
-        completed: (completed === task.children.length)
+        stringRatio: `${completed}/${task.children.length}`,
+        completed: (task.children.length > 0 && completed === task.children.length),
+        ratio: task.children.length > 0 ? completed / task.children.length : 0
       };
     }
   },
@@ -547,7 +556,7 @@ myApp.services = {
 
 
   loadDemo: () => {
-    myApp.services.data = JSON.parse(JSON.stringify(myApp.services.defaultData));
+    myApp.services.data = JSON.parse(JSON.stringify(myApp.services.demoData));
     myApp.services.storage.save.tasks();
     myApp.services.storage.save.categories();
     myApp.services.storage.save.settings();
@@ -558,7 +567,10 @@ myApp.services = {
     load: () => {
       myApp.services.data.tasks = JSON.parse(localStorage.getItem("tasks")) ?? {pending:[], completed:[]};
       myApp.services.data.categories = JSON.parse(localStorage.getItem("categories")) ?? [];
-      myApp.services.data.settings = JSON.parse(localStorage.getItem("settings")) ?? {search: {includeDescription: false, includeSubTasks: false}};
+      myApp.services.data.settings = JSON.parse(localStorage.getItem("settings")) ?? {search: {includeDescription: false, includeSubTasks: false}, order: {type: ORDER.type.name, croissant: ORDER.croissant, urgentBefore: ORDER.urgentBefore}};
+      ORDER.type = ORDER.available.find(f => f.name === myApp.services.data.settings.order.type);
+      ORDER.urgentBefore = myApp.services.data.settings.order.urgentBefore;
+      ORDER.croissant = myApp.services.data.settings.order.croissant;
     },
 
     save: {
@@ -591,13 +603,18 @@ myApp.services = {
       search: {
         includeDescription: false,
         includeSubTasks: false
+      },
+      order: {
+        type: ORDER.type.name,
+        croissant: ORDER.croissant,
+        urgentBefore: ORDER.urgentBefore
       }
     }
   },
 
 
 
-  defaultData: {
+  demoData: {
     tasks: {
       pending: [
         {
@@ -752,6 +769,11 @@ myApp.services = {
       search: {
         includeDescription: false,
         includeSubTasks: false
+      },
+      order: {
+        type: ORDER.type.name,
+        croissant: ORDER.croissant,
+        urgentBefore: ORDER.urgentBefore
       }
     }
   }

@@ -3,20 +3,59 @@
  * Le contrôleur ne doit pas agir directement sur les tâches des tableaux. Il doit appeler les méthodes de services.
  */
 
-const NO_FILTER = "no_filter";
-const CATEG = "categ";
-const NO_CATEG = "no_categ";
-const ALL_CATEGS = "all_categs";
-const PLANNED = "with_echeance";
-const URGENT = "urgent";
-const MYDAY = "myday";
-const SEARCH = "search";
+const FILTER_NO = "no_filter";
+const FILTER_CATEG = "categ";
+const FILTER_NO_CATEG = "no_categ";
+const FILTER_ALL_CATEGS = "all_categs";
+const FILTER_PLANNED = "with_echeance";
+const FILTER_URGENT = "urgent";
+const FILTER_MYDAY = "myday";
+const FILTER_SEARCH = "search";
 
 let FILTER = {
-  type: MYDAY,
+  type: FILTER_MYDAY,
   category: null,
   search: null
 };
+
+
+const ORDER_ALPHA = (e1, e2) => {
+  return e1.title.localeCompare(e2.title);
+};
+const ORDER_CREATION = (e1, e2) => {
+  if (e1.created === e2.created) return ORDER_ALPHA(e1, e2);
+  return (e1.created < e2.created) ? -1 : 1;
+};
+const ORDER_ECHEANCE = (e1, e2) => {
+  if (e1.echeance === e2.echeance) return ORDER_ALPHA(e1, e2);
+  return e1.echeance.localeCompare(e2.echeance);
+};
+const ORDER_COMPLETION = (e1, e2) => {
+  let res1 = myApp.services.tasks.subTasksCompleted(e1).ratio;
+  let res2 = myApp.services.tasks.subTasksCompleted(e2).ratio;
+  if (res1 === res2) return ORDER_ALPHA(e1, e2);
+  return (res1 < res2) ? -1 : 1;
+};
+const ORDER_URGENT = (e1, e2) => {
+  if (e1.urgent !== e2.urgent) {
+    if (e1.urgent) return -1;
+    if (e2.urgent) return 1;
+  }
+  return 0;
+}
+
+let ORDER = {
+  type: ORDER_CREATION,
+  croissant: true,
+  urgentBefore: true,
+  available: [
+      ORDER_ALPHA,
+      ORDER_COMPLETION,
+      ORDER_CREATION,
+      ORDER_ECHEANCE
+  ]
+};
+
 
 let lastDelClicked = null;
 let nbClickDeleteCateg = 0;
@@ -30,6 +69,7 @@ function getDateInFormatYearMonthDate(date, separator = '-') {
 function getDateInFormatDateMonthYear(date, separator = '-') {
   return `${date.getDate().toString().padStart(2, '0')}${separator}${(date.getMonth()+1).toString().padStart(2, '0')}${separator}${date.getFullYear()}`;
 }
+
 
 myApp.controllers = {
   tabbarPage: (page) => {
@@ -45,16 +85,16 @@ myApp.controllers = {
           // application des paramètres par défaut à partir du filtre courant
           let newTaskPage = document.querySelector('#newTaskPage');
           switch (FILTER.type) {
-            case PLANNED: {
+            case FILTER_PLANNED: {
               // planification par défaut à la date du jour
               newTaskPage.querySelector('#echeance').value = getDateInFormatYearMonthDate(new Date());
               break;
             }
-            case URGENT: {
+            case FILTER_URGENT: {
               newTaskPage.querySelector('#urgent').checked = true;
               break;
             }
-            case MYDAY: {
+            case FILTER_MYDAY: {
               newTaskPage.querySelector('#myday').checked = true;
               break;
             }
@@ -85,7 +125,7 @@ myApp.controllers = {
     page.querySelector("#default-category-list").querySelectorAll("ons-radio").forEach(radio => {
       radio.onchange = myApp.controllers.filter.eventHandler;
     });
-    page.querySelector("#search-input").oninput = () => myApp.controllers.filter.set(SEARCH);
+    page.querySelector("#search-input").oninput = () => myApp.controllers.filter.set(FILTER_SEARCH);
 
     page.querySelector('#button-settings').onclick = () => {
       document.querySelector('#myNavigator').pushPage('html/settings.html').then(myApp.controllers.affichage.updateSettings);
@@ -360,7 +400,7 @@ myApp.controllers = {
             if (name) {
               let subTask = {
                 title: name,
-                checked: false,
+                completed: false,
                 created: Date.now()
               };
               myApp.controllers.tasks.edit.subTasks.add.hideAlertDialog(event);
@@ -606,7 +646,7 @@ myApp.controllers = {
       } else {
         myApp.controllers.categories.edit.hideAlertDialog(event);
         myApp.services.categories.delete(data);
-        myApp.controllers.filter.set(ALL_CATEGS);
+        myApp.controllers.filter.set(FILTER_ALL_CATEGS);
         myApp.controllers.affichage.updateLists();
         myApp.controllers.affichage.updateCategories();
       }
@@ -620,91 +660,105 @@ myApp.controllers = {
     eventHandler: (event) => {
       let categ = event.target.parentNode.parentNode.parentNode;
       if (categ.data) {
-        myApp.controllers.filter.set(CATEG, categ.data.name);
+        myApp.controllers.filter.set(FILTER_CATEG, categ.data.name);
       } else {
         switch (event.target.id) {
           case "r-myday": {
-            myApp.controllers.filter.set(MYDAY);
+            myApp.controllers.filter.set(FILTER_MYDAY);
             break;
           }
           case "r-urgent": {
-            myApp.controllers.filter.set(URGENT);
+            myApp.controllers.filter.set(FILTER_URGENT);
             break;
           }
           case "r-planned": {
-            myApp.controllers.filter.set(PLANNED);
+            myApp.controllers.filter.set(FILTER_PLANNED);
             break;
           }
           case "r-all": {
-            myApp.controllers.filter.set(ALL_CATEGS);
+            myApp.controllers.filter.set(FILTER_ALL_CATEGS);
             break;
           }
           case "r-no": {
-            myApp.controllers.filter.set(NO_CATEG);
+            myApp.controllers.filter.set(FILTER_NO_CATEG);
             break;
           }
           default: {
-            myApp.controllers.filter.set(NO_FILTER);
+            myApp.controllers.filter.set(FILTER_NO);
             break;
           }
         }
       }
     },
 
-    set: (filter = NO_FILTER, categ = null) => {
+    set: (filter = FILTER_NO, categ = null) => {
       FILTER.type = filter;
       FILTER.category = categ;
       FILTER.search = null;
       let defaultFilers = document.querySelector("#default-category-list");
       let title = document.querySelector("#tabbarPage").querySelector(".center");
       switch (FILTER.type) {
-        case NO_FILTER: {
+        case FILTER_NO: {
           title.innerText = "À faire";
           defaultFilers.parentNode.querySelector("#search-input").value = "";
           break;
         }
-        case SEARCH: {
+        case FILTER_SEARCH: {
           FILTER.search = defaultFilers.parentNode.querySelector("#search-input").value;
           title.innerText = "Résultats de recherche";
           defaultFilers.parentNode.querySelector("#r-search").checked = true;
           break;
         }
-        case CATEG: {
+        case FILTER_CATEG: {
           title.innerText = categ;
           defaultFilers.parentNode.querySelector("#search-input").value = "";
           break;
         }
-        case NO_CATEG: {
+        case FILTER_NO_CATEG: {
           title.innerText = "Sans catégorie";
           defaultFilers.querySelector("#r-no").checked = true;
           defaultFilers.parentNode.querySelector("#search-input").value = "";
           break;
         }
-        case ALL_CATEGS: {
+        case FILTER_ALL_CATEGS: {
           title.innerText = "Toutes les catégories";
           defaultFilers.querySelector("#r-all").checked = true;
           defaultFilers.parentNode.querySelector("#search-input").value = "";
           break;
         }
-        case PLANNED: {
+        case FILTER_PLANNED: {
           title.innerText = "📅 Planifié";
           defaultFilers.querySelector("#r-planned").checked = true;
           defaultFilers.parentNode.querySelector("#search-input").value = "";
           break;
         }
-        case URGENT: {
+        case FILTER_URGENT: {
           title.innerText = "❗ Important";
           defaultFilers.querySelector("#r-urgent").checked = true;
           defaultFilers.parentNode.querySelector("#search-input").value = "";
           break;
         }
-        case MYDAY: {
+        case FILTER_MYDAY: {
           title.innerText = "🌞 Ma journée";
           defaultFilers.querySelector("#r-myday").checked = true;
           defaultFilers.parentNode.querySelector("#search-input").value = "";
           break;
         }
       }
+      myApp.controllers.affichage.updateLists();
+    }
+  },
+
+
+
+  order: {
+    // onchange events handler
+    eventHandler: (event) => {},
+
+    set: (order = ORDER_CREATION, croissant = ORDER.croissant, urgentBefore = ORDER.urgentBefore) => {
+      ORDER.type = order;
+      ORDER.croissant = croissant;
+      ORDER.urgentBefore = urgentBefore
       myApp.controllers.affichage.updateLists();
     }
   }
