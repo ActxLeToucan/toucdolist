@@ -21,6 +21,7 @@ let FILTER = {
 let lastDelClicked = null;
 let nbClickDeleteCateg = 0;
 let nbClickDeleteSubtask = 0;
+let nbClickLoadDemo = 0;
 
 function getDateInFormatYearMonthDate(date, separator = '-') {
   return `${date.getFullYear()}${separator}${(date.getMonth()+1).toString().padStart(2, '0')}${separator}${date.getDate().toString().padStart(2, '0')}`;
@@ -132,10 +133,17 @@ myApp.controllers = {
 
       // mode demo
       document.querySelector('#button-demo').onclick = () => {
-        myApp.services.loadDemo();
-        myApp.controllers.affichage.updateLists();
-        myApp.controllers.affichage.updateCategories();
-        myApp.controllers.affichage.updateSettings();
+        if (nbClickLoadDemo === 0) {
+          nbClickLoadDemo = 1;
+          document.querySelector('#demo').insertBefore(ons.createElement("<p id='confirm-load-demo'>Cliquez à nouveau sur le bouton pour confirmer</p>"), document.querySelector('#button-demo'));
+        } else {
+          nbClickLoadDemo = 0;
+          document.querySelector('#demo #confirm-load-demo').remove();
+          myApp.services.loadDemo();
+          myApp.controllers.affichage.updateLists();
+          myApp.controllers.affichage.updateCategories();
+          myApp.controllers.affichage.updateSettings();
+        }
       }
 
       // clear
