@@ -28,6 +28,8 @@ const ORDER_CREATION = (e1, e2) => {
 };
 const ORDER_ECHEANCE = (e1, e2) => {
   if (e1.echeance === e2.echeance) return ORDER_ALPHA(e1, e2);
+  if (e1.echeance === '') return 1;
+  if (e2.echeance === '') return -1;
   return e1.echeance.localeCompare(e2.echeance);
 };
 const ORDER_COMPLETION = (e1, e2) => {
@@ -53,7 +55,16 @@ let ORDER = {
       ORDER_COMPLETION,
       ORDER_CREATION,
       ORDER_ECHEANCE
-  ]
+  ],
+  getName(order) {
+    switch (order) {
+      case ORDER_ALPHA: return "Alphabétique";
+      case ORDER_COMPLETION: return "Taux de complétion";
+      case ORDER_CREATION: return "Date de création";
+      case ORDER_ECHEANCE: return "Date d'échéance";
+      default: return "invalid";
+    }
+  }
 };
 
 
@@ -180,6 +191,7 @@ myApp.controllers = {
           nbClickLoadDemo = 0;
           document.querySelector('#demo #confirm-load-demo').remove();
           myApp.services.loadDemo();
+          myApp.controllers.affichage.updateOrder();
           myApp.controllers.affichage.updateLists();
           myApp.controllers.affichage.updateCategories();
           myApp.controllers.affichage.updateSettings();
@@ -193,6 +205,10 @@ myApp.controllers = {
 
     updateDetails: (data, completed) => {
       myApp.services.tasks.generate.details(data, completed);
+    },
+
+    updateOrder: () => {
+      myApp.services.settings.order.show();
     }
   },
 
@@ -753,12 +769,28 @@ myApp.controllers = {
 
   order: {
     // onchange events handler
-    eventHandler: (event) => {},
+    eventHandler: (event) => {
+      myApp.controllers.order.set(ORDER.available.find(f => f.name === event.target.value));
+      myApp.services.settings.order.changeOrder(ORDER.type);
+    },
+
+    switch: () => {
+      ORDER.croissant = !ORDER.croissant;
+      myApp.services.settings.order.switch();
+      myApp.controllers.affichage.updateLists();
+    },
+
+    urgentBefore: (event) => {
+      let checked = event.target.checked;
+      ORDER.urgentBefore = checked;
+      myApp.services.settings.order.urgentBefore(checked);
+      myApp.controllers.affichage.updateLists();
+    },
 
     set: (order = ORDER_CREATION, croissant = ORDER.croissant, urgentBefore = ORDER.urgentBefore) => {
       ORDER.type = order;
       ORDER.croissant = croissant;
-      ORDER.urgentBefore = urgentBefore
+      ORDER.urgentBefore = urgentBefore;
       myApp.controllers.affichage.updateLists();
     }
   }

@@ -551,6 +551,50 @@ myApp.services = {
         myApp.services.data.settings.search.includeSubTasks = !myApp.services.data.settings.search.includeSubTasks;
         myApp.services.storage.save.settings();
       }
+    },
+
+    order: {
+      show: () => {
+        let orderBlock = document.querySelector('#order');
+
+        let select = orderBlock.querySelector("#order-select").querySelector("select");
+        select.innerHTML = "";
+        ORDER.available.forEach(option => {
+          let e = ons.createElement(`
+            <option value="${option.name}" ${myApp.services.data.settings.order.type === option.name ? "selected" : ""}>${ORDER.getName(option)}</option>
+          `);
+          select.insertBefore(e, null);
+        });
+        select.onchange = myApp.controllers.order.eventHandler;
+
+        let button = orderBlock.querySelector("#button-sens");
+        orderBlock.querySelector("#croissant").classList.remove("order_sens_unselected");
+        orderBlock.querySelector("#decroissant").classList.remove("order_sens_unselected");
+        button.querySelector(!myApp.services.data.settings.order.croissant ? "#croissant" : "#decroissant").classList.add("order_sens_unselected");
+        button.onclick = myApp.controllers.order.switch;
+
+        let checkBox = orderBlock.querySelector(".urgent-before-checkbox");
+        checkBox.checked = myApp.services.data.settings.order.urgentBefore;
+        checkBox.onchange = myApp.controllers.order.urgentBefore;
+      },
+
+      switch: () => {
+        let orderBlock = document.querySelector('#order');
+        orderBlock.querySelector("#croissant").classList.toggle("order_sens_unselected");
+        orderBlock.querySelector("#decroissant").classList.toggle("order_sens_unselected");
+        myApp.services.data.settings.order.croissant = !myApp.services.data.settings.order.croissant;
+        myApp.services.storage.save.settings();
+      },
+
+      urgentBefore: (urgentBefore) => {
+        myApp.services.data.settings.order.urgentBefore = urgentBefore;
+        myApp.services.storage.save.settings();
+      },
+
+      changeOrder: (order) => {
+        myApp.services.data.settings.order.type = order.name;
+        myApp.services.storage.save.settings();
+      }
     }
   },
 
@@ -567,7 +611,7 @@ myApp.services = {
     load: () => {
       myApp.services.data.tasks = JSON.parse(localStorage.getItem("tasks")) ?? {pending:[], completed:[]};
       myApp.services.data.categories = JSON.parse(localStorage.getItem("categories")) ?? [];
-      myApp.services.data.settings = JSON.parse(localStorage.getItem("settings")) ?? {search: {includeDescription: false, includeSubTasks: false}, order: {type: ORDER.type.name, croissant: ORDER.croissant, urgentBefore: ORDER.urgentBefore}};
+      myApp.services.data.settings = JSON.parse(localStorage.getItem("settings")) ?? {search: {includeDescription: false, includeSubTasks: false}, order: {type: ORDER_CREATION.name, croissant: true, urgentBefore: true}};
       ORDER.type = ORDER.available.find(f => f.name === myApp.services.data.settings.order.type);
       ORDER.urgentBefore = myApp.services.data.settings.order.urgentBefore;
       ORDER.croissant = myApp.services.data.settings.order.croissant;
@@ -605,9 +649,9 @@ myApp.services = {
         includeSubTasks: false
       },
       order: {
-        type: ORDER.type.name,
-        croissant: ORDER.croissant,
-        urgentBefore: ORDER.urgentBefore
+        type: ORDER_CREATION.name,
+        croissant: true,
+        urgentBefore: true
       }
     }
   },
@@ -771,9 +815,9 @@ myApp.services = {
         includeSubTasks: false
       },
       order: {
-        type: ORDER.type.name,
-        croissant: ORDER.croissant,
-        urgentBefore: ORDER.urgentBefore
+        type: ORDER_CREATION.name,
+        croissant: true,
+        urgentBefore: true
       }
     }
   }

@@ -58,6 +58,14 @@ La couleur s'appliquera à toutes les tâches de la catégorie.
 ## Recherche
 La recherche permet de rechercher dans l'ensemble des tâches une chaîne de caractères, tout en gardant la séparation des tâches en attente et des tâches terminées. La recherche s'ffectue dans le titre des tâches, mais il est possible (à partir des [options](#options)) de demander à rechercher aussi dans la description et/ou dans le nom des sous-tâches.
 
+## Ordre des tâches
+Vous pouvez choisir l'ordre dans lequel les tâches vont s'afficher. Chaque ordre peut être inversé, et il est possible de placer les tâches urgentes en haut ou non.
+### Ordres
+* Alphabétique
+* Taux de complétion (aucune sous-tâche = 0%)
+* Date de création (par défaut)
+* Date d'échéance (tâches sans date = échéance ♾️)
+
 ## Options avancées
 ### Statistiques
 Les statistiques vous donnent un apperçu de votre utilisation de la to-do list avec par exemple votre nombre de catégories, de tâches terminées, ou encore le nombre moyen de jours pour effctuer une tâche.

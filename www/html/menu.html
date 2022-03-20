@@ -7,6 +7,17 @@
     <ons-input id="search-input" type="search" modifier="underbar" placeholder="Rechercher" float></ons-input>
   </ons-list-item>
 
+  <ons-list-title id="order-title">Ordre des tâches</ons-list-title>
+  <div id="order" style="text-align: center">
+    <ons-select id="order-select">
+    </ons-select>
+    <br />
+    <ons-button id="button-sens" modifier="quiet"><span id="croissant">⬇️</span><span id="decroissant">⬆️</span></ons-button>
+    <br />
+    <label for="urgent-before">Tâches urgentes en haut</label>
+    <ons-checkbox input-id="urgent-before" class="urgent-before-checkbox"></ons-checkbox>
+  </div>
+
   <ons-list-title>Par défaut</ons-list-title>
   <ons-list id="default-category-list">
     <ons-list-item tappable>

@@ -13,6 +13,7 @@ document.addEventListener('init', function(event) {
   // This only happens once at the beginning of the app.
   if (page.id === 'menuPage' || page.id === 'pendingTasksPage' || page.id === 'completedTasksPage') {
     myApp.services.categories.show();
+    myApp.services.settings.order.show();
     if (document.querySelector('#menuPage')
       && document.querySelector('#pendingTasksPage')
       && !document.querySelector('#pendingTasksPage ons-list-item')
