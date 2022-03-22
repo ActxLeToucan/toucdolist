@@ -117,3 +117,7 @@ ons-list-item + #button-new-categ {
 #order-title {
     padding-bottom: 0;
 }
+
+.block-hidden {
+    display: none;
+}

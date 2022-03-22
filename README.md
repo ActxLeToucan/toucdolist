@@ -2,6 +2,28 @@
 Application "To-Do List" avec Cordova, réalisée par Antoine Contoux.
 
 # Fonctionnalités
+* [Tâche](#tâche)
+* [Sous-tâche](#sous-tâche)
+* [Filtres](#filtres)
+  * [Ma journée](#ma-journée)
+  * [Important](#important)
+  * [Plannifié](#planifié)
+  * [Toutes les catégories](#toutes-les-catégories)
+  * [Sans catégorie](#sans-catégorie)
+  * [Filtres spéciaux](#filtres-spéciaux)
+* [Catégorie](#catégorie)
+* [Recherche](#recherche)
+* [Ordre des tâches](#ordre-des-tâches)
+  * [Ordres](#ordres)
+* [Options avancées](#options-avancées)
+  * [Statistiques](#statistiques)
+  * [Recherche](#recherche-1)
+  * [Bug](#bug)
+  * [Nettoyage](#nettoyage)
+* [Suppression](#suppression)
+* [Stockage](#stockage)
+
+
 ## Tâche
 Il est possible de créer, de modifier et de supprimer une tâche.
 Une tâche contient :
@@ -49,6 +71,9 @@ Voir [Catégorie](#cat%C3%A9gorie) et [Recherche](#recherche).
 ## Catégorie
 Il est possible de créer, de modifier et de supprimer une catégorie.
 Une catégorie est un filtre qui n'affichera que les tâches qui en font partie.
+
+Lors de la suppression d'une catégorie, il est possible de choisir de supprimer les tâches de cette catégorie ou de les garder (elles seront dans ce cas simplement sans catégorie).
+
 Une catégorie possède :
 * Un nom (unique)
 * Une couleur

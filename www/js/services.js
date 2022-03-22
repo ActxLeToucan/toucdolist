@@ -454,17 +454,15 @@ myApp.services = {
       myApp.services.storage.save.categories();
     },
 
-    delete: (data) => {
-      myApp.services.data.tasks.pending.forEach(task => {
-        if (task.category === data.name) {
-          task.category = '';
-        }
-      });
-      myApp.services.data.tasks.completed.forEach(task => {
-        if (task.category === data.name) {
-          task.category = '';
-        }
-      });
+    delete: (data, deleteTasks) => {
+      let tasks = myApp.services.categories.tasks(data.name);
+      if (deleteTasks) {
+        tasks.pending.forEach(t => myApp.services.tasks.delete(t, false));
+        tasks.completed.forEach(t => myApp.services.tasks.delete(t, true));
+      } else {
+        tasks.pending.forEach(t => myApp.services.tasks.edit.category(t, false, ''));
+        tasks.completed.forEach(t => myApp.services.tasks.edit.category(t, true, ''));
+      }
       myApp.services.data.categories.splice(myApp.services.data.categories.indexOf(data), 1);
       myApp.services.storage.save.categories();
     },
@@ -528,14 +526,13 @@ myApp.services = {
     },
 
     tasks: (categoryName) => {
-      let nbTasks = myApp.services.data.tasks.pending.reduce((prev, curr) => {
-        return prev + (curr.category === categoryName ? 1 : 0);
-      }, 0);
-      nbTasks += myApp.services.data.tasks.completed.reduce((prev, curr) => {
-        return prev + (curr.category === categoryName ? 1 : 0);
-      }, 0);
-
-      return nbTasks;
+      let pendingTasks = myApp.services.data.tasks.pending.filter(t => t.category === categoryName);
+      let completedTasks = myApp.services.data.tasks.completed.filter(t => t.category === categoryName);
+      return {
+        pending: pendingTasks,
+        completed: completedTasks,
+        length: pendingTasks.length + completedTasks.length
+      };
     }
   },
 

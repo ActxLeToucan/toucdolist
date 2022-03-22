@@ -163,7 +163,7 @@ myApp.controllers = {
       document.querySelector('#stats-todo').querySelector(".stats-number").innerText = myApp.services.data.tasks.pending.length;
       document.querySelector('#stats-completed').querySelector(".stats-number").innerText = myApp.services.data.tasks.completed.length;
       document.querySelector('#stats-late').querySelector(".stats-number").innerText = myApp.services.tasks.late();
-      let tasksInCategs = myApp.services.data.categories.reduce((prev, curr) => prev + myApp.services.categories.tasks(curr.name), 0);
+      let tasksInCategs = myApp.services.data.categories.reduce((prev, curr) => prev + myApp.services.categories.tasks(curr.name).length, 0);
       document.querySelector('#stats-avg-tasks-in-categs').querySelector(".stats-number").innerText = myApp.services.data.categories.length > 0 ? (tasksInCategs / myApp.services.data.categories.length).toFixed(1) : '0.0';
       let durations = myApp.services.data.tasks.completed.reduce((prev, curr) => prev + myApp.services.tasks.duration(curr), 0);
       document.querySelector("#stats-avg-time").querySelector(".stats-number").innerText = myApp.services.data.tasks.completed.length > 0 ? Math.ceil(durations / myApp.services.data.tasks.completed.length) : 0;
@@ -595,7 +595,9 @@ myApp.controllers = {
       hideAlertDialog: (event) => {
         document.getElementById('alert-dialog-edit-categ').hide();
         let res = event.target.parentNode.parentNode.querySelector('.res-button');
+        let checkBoxBlock = event.target.parentNode.parentNode.querySelector('#remove-categ-tasks-block');
         res.innerText = "";
+        if (!checkBoxBlock.classList.contains('block-hidden')) checkBoxBlock.classList.add('block-hidden');
         nbClickDeleteCateg = 0;
       },
 
@@ -655,13 +657,15 @@ myApp.controllers = {
     delete: (event) => {
       let data = event.target.parentNode.parentNode.parentNode.parentNode.data;
       let res = event.target.parentNode.parentNode.querySelector('.res-button');
+      let checkBoxBlock = event.target.parentNode.parentNode.querySelector('#remove-categ-tasks-block');
 
       if (nbClickDeleteCateg === 0) {
-        res.innerText = "Cette action est irréversible. En continuant, les tâches de cette catégorie deviendront sans catégorie.\nAppuyez à nouveau sur le bouton \"Supprimer\" pour confirmer.";
+        checkBoxBlock.classList.remove('block-hidden');
+        res.innerText = "Cette action est irréversible.\nAppuyez à nouveau sur le bouton \"Supprimer\" pour confirmer.";
         nbClickDeleteCateg = 1;
       } else {
         myApp.controllers.categories.edit.hideAlertDialog(event);
-        myApp.services.categories.delete(data);
+        myApp.services.categories.delete(data, checkBoxBlock.querySelector("#remove-categ-tasks").checked);
         myApp.controllers.filter.set(FILTER_ALL_CATEGS);
         myApp.controllers.affichage.updateLists();
         myApp.controllers.affichage.updateCategories();
