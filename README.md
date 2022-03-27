@@ -1,7 +1,7 @@
 # Touc-Do List
-Application "To-Do List" avec Cordova, réalisée par Antoine Contoux, projet du module "Developpement Mobile".
+Application "To-Do List" avec Cordova, réalisée par Antoine Contoux, projet du module "Developpement Mobile" (DUT Informatique, 2<sup>ème</sup> année).
 
-*Pour la naviagtion dans les fichiers, il est fortement recommandée du'iliser la **structure** des fichiers pour ne pas se perdre.*
+*Pour la naviagtion dans les fichiers, il est fortement recommandée d'uiliser la **structure** des fichiers pour ne pas se perdre, ou de suivre les liens présents sur cette page.*
 
 
 # Fonctionnalités du sujet implémentées
