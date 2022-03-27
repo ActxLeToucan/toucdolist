@@ -5,24 +5,44 @@
  */
 
 myApp.services = {
+  /**
+   * Gestion des données concernant les tâches
+   */
   tasks: {
+    /**
+     * Ajout d'une tâche
+     * @param data tâche à ajouter
+     */
     add: (data) => {
       myApp.services.data.tasks.pending.push(data);
       myApp.services.storage.save.tasks();
     },
 
+    /**
+     * Suppression de toutes les tâches
+     */
     clear: () => {
       myApp.services.data.tasks.pending = [];
       myApp.services.data.tasks.completed = [];
       myApp.services.storage.save.tasks();
     },
 
+    /**
+     * Suppression d'une tâche
+     * @param data tâche à supprimer
+     * @param taskCompleted état de la tâche à supprimer (true si terminé)
+     */
     delete: (data, taskCompleted) => {
       let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
       tab.splice(tab.indexOf(data), 1);
       myApp.services.storage.save.tasks();
     },
 
+    /**
+     * Calcul du temps pour effectuer une tâche
+     * @param data tâche
+     * @returns {number} résultat du calcul (en jours)
+     */
     duration: (data) => {
       let task = myApp.services.data.tasks.completed.find(t => t === data);
       let dateCreated = new Date(task.created);
@@ -31,56 +51,69 @@ myApp.services = {
       return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     },
 
+    /**
+     * Edition d'une tâche
+     */
     edit: {
+      // Mise à jour de la catégorie d'une tâche
       category: (data, taskCompleted, newCateg) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).category = newCateg;
         myApp.services.storage.save.tasks();
       },
 
+      // Mise  à jour de la description d'une tâche
       description: (data, taskCompleted, newDescription) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).description = newDescription;
         myApp.services.storage.save.tasks();
       },
 
+      // Changement de la date d'échéance d'une tâche
       echeance: (data, taskCompleted, newEcheance) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).echeance = newEcheance;
         myApp.services.storage.save.tasks();
       },
 
+      // Mise en évidence d'une tâche
       highlight: (data, taskCompleted) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).highlight = !data.highlight;
         myApp.services.storage.save.tasks();
       },
 
+      // Ajout d'une tâche à 'Ma journée'
       myday: (data, taskCompleted, inMyDay) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).myday = (inMyDay ? getDateInFormatYearMonthDate(new Date()) : "");
         myApp.services.storage.save.tasks();
       },
 
+      // Définir une tâche comme urgente
       priority: (data, taskCompleted) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).urgent = !data.urgent;
         myApp.services.storage.save.tasks();
       },
 
+      // Gestion des sous-tâches d'une tâche
       subTasks: {
+        // Ajout d'une sous-tâche
         add: (data, taskCompleted, subTask) => {
           let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
           tab.find(task => task === data).children.push(subTask);
           myApp.services.storage.save.tasks();
         },
 
+        // Suppression d'une sous-tâche
         delete: (data, taskCompleted, subTask) => {
           let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
           tab.find(task => task === data).children.splice(tab.find(task => task === data).children.indexOf(subTask), 1);
           myApp.services.storage.save.tasks();
         },
 
+        // Edition d'une sous-tâche
         edit: {
           name: (data, taskCompleted, subTask, newTitle) => {
             let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
@@ -89,6 +122,7 @@ myApp.services = {
           }
         },
 
+        // Changement de l'état (terminé ou non) d'une sous-tâche
         setState: (data, taskCompleted, subTask) => {
           let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
           tab.find(task => task === data).children.find(s => s === subTask).completed = !tab.find(task => task === data).children.find(s => s === subTask).completed;
@@ -96,6 +130,7 @@ myApp.services = {
         }
       },
 
+      // Changement du titre d'une tâche
       title: (data, taskCompleted, newTitle) => {
         let tab = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
         tab.find(task => task === data).title = newTitle;
@@ -103,7 +138,11 @@ myApp.services = {
       },
     },
 
+    /**
+     * Génération des affichages
+     */
     generate: {
+      // Génération de l'affichage d'une tâche
       task: (data, taskCompleted) => {
         let subTasksCompleted = myApp.services.tasks.subTasksCompleted(data);
         let color = '#000000';
@@ -140,6 +179,7 @@ myApp.services = {
         list.insertBefore(taskItem, null);
       },
 
+      // Génération de la page de détails d'une tâche
       details: (task, taskCompleted) => {
         let dateTime = new Date(task.created);
         let taskDate = getDateInFormatDateMonthYear(dateTime, '/');
@@ -283,6 +323,10 @@ myApp.services = {
       }
     },
 
+    /**
+     * Compte le nombre de tâches en retard
+     * @returns {number} nombre de tâches en retard
+     */
     late: () => {
       let late = 0
       myApp.services.data.tasks.pending.forEach(task => {
@@ -294,6 +338,11 @@ myApp.services = {
       return late;
     },
 
+    /**
+     * Indique si une tâche correspond aux critères de recherche
+     * @param data tâche
+     * @returns {boolean|boolean}
+     */
     search: (data) => {
       return FILTER.search
           && (data.title.toLowerCase().includes(FILTER.search.toLowerCase()))
@@ -303,6 +352,11 @@ myApp.services = {
               && data.children.reduce((prev, curr) => prev + curr.title.toLowerCase().includes(FILTER.search.toLowerCase()) ? 1 : 0, 0) > 0);
     },
 
+    /**
+     * Change l'état (terminé ou en attente) d'une tâche
+     * @param data tâche
+     * @param taskCompleted nouvel état de la tâche
+     */
     setState: (data, taskCompleted) => {
       let tab1 = (taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
       let tab2 = (!taskCompleted ? myApp.services.data.tasks.completed : myApp.services.data.tasks.pending);
@@ -312,7 +366,11 @@ myApp.services = {
       myApp.services.storage.save.tasks();
     },
 
+    /**
+     * Affichage des tâches
+     */
     show: {
+      // Affichage des tâches en attente
       pendingList: () => {
         let pendingList = document.querySelector('#pending-list');
         pendingList.innerHTML = "";
@@ -353,6 +411,7 @@ myApp.services = {
                  - tâches avec "ma journée" cochée aujourd'hui
                  - tâches qui ne sont pas finies avec "ma journée" cochée avant aujourd'hui
                  - tâches qui arrivent à échéance à aujourd'hui ou en retard
+                 Equivalent de la fonctionnalité P2, mais en mieux. L'utilisation d'un onglet supplémentaire n'a pas d'intérêt.
                */
               let date = new Date();
               let dateFormatted = getDateInFormatYearMonthDate(date);
@@ -373,6 +432,7 @@ myApp.services = {
         });
       },
 
+      // Affichage des tâches terminées
       completedList: () => {
         let completedTasksPage = document.querySelector('#completed-list');
         completedTasksPage.innerHTML = "";
@@ -425,6 +485,11 @@ myApp.services = {
       },
     },
 
+    /**
+     * Résultats sur la complétion d'une tâche (à partir de ses sous-tâches)
+     * @param task tâche
+     * @returns {{stringRatio: string, completed: boolean, ratio: (number|number)}}
+     */
     subTasksCompleted: (task) => {
       let completed = task.children.reduce((prev, curr) => prev + (curr.completed ? 1 : 0), 0);
       return {
@@ -436,8 +501,15 @@ myApp.services = {
   },
 
 
-
+  /**
+   * Gestion des données concernant les catégories
+   */
   categories: {
+    /**
+     * Ajout d'une catégorie
+     * @param name nom
+     * @param color couleur
+     */
     add: (name, color) => {
       myApp.services.data.categories.push({
         name: name,
@@ -447,6 +519,10 @@ myApp.services = {
       myApp.services.storage.save.categories();
     },
 
+    /**
+     * Suppression de toutes les catégories.
+     * Ne supprime pas les tâches associées.
+     */
     clear: () => {
       myApp.services.data.tasks.pending.forEach(task => task.category = '');
       myApp.services.data.tasks.completed.forEach(task => task.category = '');
@@ -454,6 +530,11 @@ myApp.services = {
       myApp.services.storage.save.categories();
     },
 
+    /**
+     * Suppression d'une catégorie
+     * @param data catégorie à supprimer
+     * @param deleteTasks doit-on supprimer les tâches associées ?
+     */
     delete: (data, deleteTasks) => {
       let tasks = myApp.services.categories.tasks(data.name);
       if (deleteTasks) {
@@ -467,6 +548,12 @@ myApp.services = {
       myApp.services.storage.save.categories();
     },
 
+    /**
+     * Edition d'une catégorie
+     * @param data catégorie à modifier
+     * @param name nouveau nom
+     * @param color nouvelle couleur
+     */
     edit: (data, name, color) => {
       myApp.services.data.tasks.pending.forEach(task => {
         if (task.category === data.name) {
@@ -483,6 +570,10 @@ myApp.services = {
       myApp.services.storage.save.categories();
     },
 
+    /**
+     * Génération de l'affichage d'une catégorie
+     * @param data catégorie
+     */
     generate: (data) => {
       let categ = ons.createElement(`
         <ons-list-item tappable category-id="${data.name}">
@@ -505,6 +596,11 @@ myApp.services = {
       list.insertBefore(categ, list.firstChild);
     },
 
+    /**
+     * Obtention d'une catégorie par son nom
+     * @param name nom de la catégorie
+     * @returns {*[]} tableau des catégories qui ont exactement le nom recherché (normalement de taille 0 ou 1)
+     */
     getByName: (name) => {
       let tab = [];
       myApp.services.data.categories.forEach(categ => {
@@ -513,6 +609,9 @@ myApp.services = {
       return tab;
     },
 
+    /**
+     * Affichage des catégories
+     */
     show: () => {
       let categs = document.querySelector('#custom-category-list');
       categs.innerHTML = `
@@ -525,6 +624,11 @@ myApp.services = {
       });
     },
 
+    /**
+     * Obtention des tâches associées à une catégorie
+     * @param categoryName nom de la catégorie
+     * @returns {{pending: *[], length: number, completed: *[]}}
+     */
     tasks: (categoryName) => {
       let pendingTasks = myApp.services.data.tasks.pending.filter(t => t.category === categoryName);
       let completedTasks = myApp.services.data.tasks.completed.filter(t => t.category === categoryName);
@@ -536,21 +640,32 @@ myApp.services = {
     }
   },
 
-
+  /**
+   * Gestion des données concernant les réglages
+   */
   settings: {
+    /**
+     * Réglages de la recherche
+     */
     search: {
+      // Change l'état de l'inclusion de la description pour la recherche
       changeIncludeDescription: () => {
         myApp.services.data.settings.search.includeDescription = !myApp.services.data.settings.search.includeDescription;
         myApp.services.storage.save.settings();
       },
 
+      // Change l'état de l'inclusion des sous-tâches pour la recherche
       changeIncludeSubTasks: () => {
         myApp.services.data.settings.search.includeSubTasks = !myApp.services.data.settings.search.includeSubTasks;
         myApp.services.storage.save.settings();
       }
     },
 
+    /**
+     * Réglages du tri
+     */
     order: {
+      // Affiche les ordres de tris possibles
       show: () => {
         let orderBlock = document.querySelector('#order');
 
@@ -575,6 +690,7 @@ myApp.services = {
         checkBox.onchange = myApp.controllers.order.urgentBefore;
       },
 
+      // Change le sens de l'ordre de tri
       switch: () => {
         let orderBlock = document.querySelector('#order');
         orderBlock.querySelector("#croissant").classList.toggle("order_sens_unselected");
@@ -583,11 +699,13 @@ myApp.services = {
         myApp.services.storage.save.settings();
       },
 
+      // Change la règle sur la priorité des tâches urgentes
       urgentBefore: (urgentBefore) => {
         myApp.services.data.settings.order.urgentBefore = urgentBefore;
         myApp.services.storage.save.settings();
       },
 
+      // Changement de l'ordre de tri
       changeOrder: (order) => {
         myApp.services.data.settings.order.type = order.name;
         myApp.services.storage.save.settings();
@@ -595,7 +713,9 @@ myApp.services = {
     }
   },
 
-
+  /**
+   * Chargement des données de démonstration
+   */
   loadDemo: () => {
     myApp.services.data = JSON.parse(JSON.stringify(myApp.services.demoData));
     myApp.services.storage.save.tasks();
@@ -604,7 +724,12 @@ myApp.services = {
   },
 
 
+  /**
+   * Gestion de la persistance des données
+   * Fonctionnalité P1
+   */
   storage: {
+    // Chargement depuis le stockage
     load: () => {
       myApp.services.data.tasks = JSON.parse(localStorage.getItem("tasks")) ?? {pending:[], completed:[]};
       myApp.services.data.categories = JSON.parse(localStorage.getItem("categories")) ?? [];
@@ -614,17 +739,21 @@ myApp.services = {
       ORDER.croissant = myApp.services.data.settings.order.croissant;
     },
 
+    // Sauvegarde des données dans le stockage
     save: {
+      // Sauvegarde des tâches
       tasks: () => {
         localStorage.removeItem("tasks");
         localStorage.setItem("tasks", JSON.stringify(myApp.services.data.tasks));
       },
 
+      // Sauvegarde des catégories
       categories: () => {
         localStorage.removeItem("categories");
         localStorage.setItem("categories", JSON.stringify(myApp.services.data.categories));
       },
 
+      // Sauvegarde des paramètres
       settings: () => {
         localStorage.removeItem("settings");
         localStorage.setItem("settings", JSON.stringify(myApp.services.data.settings));
@@ -633,7 +762,9 @@ myApp.services = {
   },
 
 
-
+  /**
+   * Données en mémoire
+   */
   data: {
     tasks: {
       pending: [],
@@ -654,7 +785,9 @@ myApp.services = {
   },
 
 
-
+  /**
+   * Données de démonstration
+   */
   demoData: {
     tasks: {
       pending: [
@@ -820,4 +953,6 @@ myApp.services = {
   }
 };
 
+
+// Chargement des données depuis le stockage à la fin du chargement de ce fichier.
 myApp.services.storage.load();

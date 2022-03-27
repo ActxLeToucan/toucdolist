@@ -3,6 +3,7 @@
  * Le contrôleur ne doit pas agir directement sur les tâches des tableaux. Il doit appeler les méthodes de services.
  */
 
+// Création des filtres
 const FILTER_NO = "no_filter";
 const FILTER_CATEG = "categ";
 const FILTER_NO_CATEG = "no_categ";
@@ -18,7 +19,8 @@ let FILTER = {
   search: null
 };
 
-
+// Création des méthodes de tri
+// Fonctionnalité S2
 const ORDER_ALPHA = (e1, e2) => {
   return e1.title.localeCompare(e2.title);
 };
@@ -83,6 +85,10 @@ function getDateInFormatDateMonthYear(date, separator = '-') {
 
 
 myApp.controllers = {
+  /**
+   * Génération de la page 'tabbarPage'
+   * Ajout des listeners
+   */
   tabbarPage: (page) => {
     // Set button functionality to open/close the menu.
     page.querySelector('[component="button/menu"]').onclick = function() {
@@ -114,7 +120,11 @@ myApp.controllers = {
             }
           }
 
-          // insertion des catégories
+          /**
+           * Insertion des catégories sur la page de création d'une tâche
+           * La catégorie présélectionnée est celle dans laquelle on se trouve.
+           * Fonctionnalité P4
+           */
           let categSelector = newTaskPage.querySelector("#select-categ").querySelector("select");
           myApp.services.data.categories.forEach(categ => {
             let elemCateg = ons.createElement(`
@@ -132,6 +142,10 @@ myApp.controllers = {
     });
   },
 
+  /**
+   * Génération de la page 'menuPage'
+   * Ajout des listeners
+   */
   menuPage: (page) => {
     page.querySelector("#default-category-list").querySelectorAll("ons-radio").forEach(radio => {
       radio.onchange = myApp.controllers.filter.eventHandler;
@@ -144,19 +158,28 @@ myApp.controllers = {
   },
 
 
-
-
-
+  /**
+   * Gestion de l'affichage
+   */
   affichage: {
+    /**
+     * Mise à jour des listes "en attente" et "terminées"
+     */
     updateLists: () => {
       myApp.services.tasks.show.pendingList();
       myApp.services.tasks.show.completedList();
     },
 
+    /**
+     * Mise à jour des catégories
+     */
     updateCategories: () => {
       myApp.services.categories.show();
     },
 
+    /**
+     * Mise à jour de la page des options avancées
+     */
     updateSettings: () => {
       // stats
       document.querySelector('#stats-categs').querySelector(".stats-number").innerText = myApp.services.data.categories.length;
@@ -186,7 +209,7 @@ myApp.controllers = {
       document.querySelector('#button-demo').onclick = () => {
         if (nbClickLoadDemo === 0) {
           nbClickLoadDemo = 1;
-          document.querySelector('#demo').insertBefore(ons.createElement("<p id='confirm-load-demo'>Cliquez à nouveau sur le bouton pour confirmer</p>"), document.querySelector('#button-demo'));
+          document.querySelector('#demo').insertBefore(ons.createElement("<p id='confirm-load-demo'>Cliquez à nouveau sur le bouton pour confirmer.</p>"), document.querySelector('#button-demo'));
         } else {
           nbClickLoadDemo = 0;
           document.querySelector('#demo #confirm-load-demo').remove();
@@ -203,18 +226,32 @@ myApp.controllers = {
       document.querySelector('#button-delete-all-tasks').onclick = myApp.controllers.tasks.clear.createAlertDialog;
     },
 
+    /**
+     * Affiche les détails de la tâche
+     * @param data tâche
+     * @param completed indique si la tâche est terminée ou non
+     */
     updateDetails: (data, completed) => {
       myApp.services.tasks.generate.details(data, completed);
     },
 
+    /**
+     * Affiche / Met à jour la sélection du tri des tâches
+     */
     updateOrder: () => {
       myApp.services.settings.order.show();
     }
   },
 
 
-
+  /**
+   * Gestion des évènements sur les tâches
+   */
   tasks: {
+    /**
+     * Ajout d'une tâche
+     * @param page page contenant le formulaire d'ajout
+     */
     add: (page) => {
       const titre = page.getElementById("titre").value.trim();
       const description = page.getElementById("description").value.trim();
@@ -244,6 +281,10 @@ myApp.controllers = {
       document.querySelector('ons-navigator').popPage();
     },
 
+    /**
+     * Suppression de toutes les tâches
+     * Fonctionnalité P3
+     */
     clear: {
       createAlertDialog: () => {
         let dialog = document.getElementById('alert-dialog-clear-tasks');
@@ -275,6 +316,9 @@ myApp.controllers = {
       }
     },
 
+    /**
+     * Suppression d'une tâche
+     */
     delete: {
       createAlertDialog: (event) => {
         lastDelClicked = event.target.localName === "ons-icon" ? event.target.parentNode.parentNode : event.target.parentNode;
@@ -310,6 +354,10 @@ myApp.controllers = {
       }
     },
 
+    /**
+     * Affiche les détails de la tâche sur laquelle on clique
+     * @param event évènement déclencheur
+     */
     details: (event) => {
       let task = (event.target.localName === "div" ? event.target.parentNode : event.target.parentNode.parentNode);
       document.querySelector('ons-navigator').pushPage('html/details_task.html').then(() =>
@@ -317,7 +365,11 @@ myApp.controllers = {
       );
     },
 
+    /**
+     * Modification d'une tâche
+     */
     edit: {
+      // Changement de la catégorie d'une tâche
       category: (event) => {
         let task = event.target.parentNode.parentNode.parentNode;
         let newValue = (event.target.value === "aucune" ? "" : event.target.value);
@@ -325,12 +377,14 @@ myApp.controllers = {
         myApp.controllers.affichage.updateLists();
       },
 
+      // Changement de la description d'une tâche
       description: (event, newValue) => {
         let task = event.target.parentNode.parentNode.parentNode;
         myApp.services.tasks.edit.description(task.data, task.completed, newValue);
         myApp.controllers.affichage.updateLists()
       },
 
+      // Définition de l'échéance d'une tâche
       echeance: (event) => {
         let task = event.target.parentNode.parentNode.parentNode;
         myApp.services.tasks.edit.echeance(task.data, task.completed, event.target.value);
@@ -344,18 +398,21 @@ myApp.controllers = {
         myApp.controllers.affichage.updateLists();
       },
 
+      // Définition d'une tâche comme urgente
       priority: (event) => {
         let task = event.target.parentNode.parentNode;
         myApp.services.tasks.edit.priority(task.data, task.completed);
         myApp.controllers.affichage.updateLists();
       },
 
+      // Mise en évidence d'une tâche
       highlight: (event) => {
         let task = event.target.parentNode.parentNode;
         myApp.services.tasks.edit.highlight(task.data, task.completed);
         myApp.controllers.affichage.updateLists();
       },
 
+      // Ajout ou retrait d'une tâche à 'Ma journée'
       myday: (event) => {
         let task = event.target.parentNode.parentNode.parentNode;
 
@@ -369,6 +426,7 @@ myApp.controllers = {
         myApp.controllers.affichage.updateLists();
       },
 
+      // Changement de l'état (terminé ou en attente) d'une tâche
       state: (event) => {
         let task = event.target.parentNode.parentNode.parentNode;
         if (event.target.checked) {
@@ -380,7 +438,9 @@ myApp.controllers = {
         }
       },
 
+      // Gestion des sous-tâches d'une tâche
       subTasks: {
+        // Ajout d'une sous-tâche
         add: {
           createAlertDialog: () => {
             let dialog = document.getElementById('alert-dialog-new-subtask');
@@ -427,7 +487,9 @@ myApp.controllers = {
           }
         },
 
+        // Edition d'une sous-tâche
         edit: {
+          // Changement de l'état (terminé ou non) d'une sous-tâche
           state: (event) => {
             let subTask = event.target.parentNode.parentNode.parentNode;
             let task = subTask.parentNode.parentNode;
@@ -469,6 +531,7 @@ myApp.controllers = {
             nbClickDeleteSubtask = 0;
           },
 
+          // Changement du titre d'une sous-tâche
           title: (event) => {
             let task = document.querySelector("#details-task-page-content");
             let data = event.target.parentNode.parentNode.parentNode.parentNode.data;
@@ -485,6 +548,7 @@ myApp.controllers = {
           }
         },
 
+        // Suppression d'une sous-tâche
         delete: (event) => {
           let task = document.querySelector("#details-task-page-content");
           let data = event.target.parentNode.parentNode.parentNode.parentNode.data;
@@ -502,6 +566,7 @@ myApp.controllers = {
         }
       },
 
+      // Changement du titre d'une tâche
       title: (event, newValue) => {
         let task = event.target.parentNode.parentNode.parentNode;
         myApp.services.tasks.edit.title(task.data, task.completed, newValue);
@@ -511,8 +576,13 @@ myApp.controllers = {
   },
 
 
-
+  /**
+   * Gestion des catégories
+   */
   categories: {
+    /**
+     * Ajout d'une nouvelle catégorie
+     */
     add: {
       createAlertDialog: () => {
         let dialog = document.getElementById('alert-dialog-new-categ');
@@ -563,6 +633,9 @@ myApp.controllers = {
       }
     },
 
+    /**
+     * Modification d'une catégorie
+     */
     edit: {
       createAlertDialog: (event) => {
         let dialog = document.getElementById('alert-dialog-edit-categ');
@@ -622,41 +695,48 @@ myApp.controllers = {
       }
     },
 
-  clear: {
-    createAlertDialog: () => {
-      let dialog = document.getElementById('alert-dialog-clear-categories');
+    /**
+     * Suppression de toutes les catégories
+     */
+    clear: {
+      createAlertDialog: () => {
+        let dialog = document.getElementById('alert-dialog-clear-categories');
 
-      if (dialog) {
-        myApp.controllers.categories.clear.showDialog(dialog);
-      } else {
-        ons.createElement('clear-categories.html', { append: true })
-            .then(function (dialog) {
-              myApp.controllers.categories.clear.showDialog(dialog);
-            });
+        if (dialog) {
+          myApp.controllers.categories.clear.showDialog(dialog);
+        } else {
+          ons.createElement('clear-categories.html', { append: true })
+              .then(function (dialog) {
+                myApp.controllers.categories.clear.showDialog(dialog);
+              });
+        }
+      },
+
+      showDialog: (dialog) => {
+        dialog.show();
+        dialog.childNodes[0].addEventListener("click", myApp.controllers.categories.clear.hideAlertDialog);
+      },
+
+      hideAlertDialog: () => {
+        document.getElementById('alert-dialog-clear-categories').hide();
+      },
+
+      clear: () => {
+        myApp.controllers.categories.clear.hideAlertDialog();
+        myApp.services.categories.clear();
+        myApp.controllers.affichage.updateSettings();
+        myApp.controllers.affichage.updateCategories();
+        myApp.controllers.affichage.updateLists();
       }
     },
 
-    showDialog: (dialog) => {
-      dialog.show();
-      dialog.childNodes[0].addEventListener("click", myApp.controllers.categories.clear.hideAlertDialog);
-    },
-
-    hideAlertDialog: () => {
-      document.getElementById('alert-dialog-clear-categories').hide();
-    },
-
-    clear: () => {
-      myApp.controllers.categories.clear.hideAlertDialog();
-      myApp.services.categories.clear();
-      myApp.controllers.affichage.updateSettings();
-      myApp.controllers.affichage.updateCategories();
-      myApp.controllers.affichage.updateLists();
-    }
-  },
-
+    /**
+     * Suppression d'une catégorie
+     */
     delete: (event) => {
       let data = event.target.parentNode.parentNode.parentNode.parentNode.data;
       let res = event.target.parentNode.parentNode.querySelector('.res-button');
+      // Fonctionnalité S4
       let checkBoxBlock = event.target.parentNode.parentNode.querySelector('#remove-categ-tasks-block');
 
       if (nbClickDeleteCateg === 0) {
@@ -674,7 +754,9 @@ myApp.controllers = {
   },
 
 
-
+  /**
+   * Gestion des filtres
+   */
   filter: {
     // onchange events handler
     eventHandler: (event) => {
@@ -711,6 +793,11 @@ myApp.controllers = {
       }
     },
 
+    /**
+     * Application d'un filtre
+     * @param filter filtre à appliquer
+     * @param categ nom de la catégorie courante (si existe)
+     */
     set: (filter = FILTER_NO, categ = null) => {
       FILTER.type = filter;
       FILTER.category = categ;
@@ -770,7 +857,9 @@ myApp.controllers = {
   },
 
 
-
+  /**
+   * Gestion du tri
+   */
   order: {
     // onchange events handler
     eventHandler: (event) => {
@@ -778,12 +867,19 @@ myApp.controllers = {
       myApp.services.settings.order.changeOrder(ORDER.type);
     },
 
+    /**
+     * Changement du sens
+     */
     switch: () => {
       ORDER.croissant = !ORDER.croissant;
       myApp.services.settings.order.switch();
       myApp.controllers.affichage.updateLists();
     },
 
+    /**
+     * Définition de la règle sur les tâches urgentes
+     * @param event évènement déclencheur
+     */
     urgentBefore: (event) => {
       let checked = event.target.checked;
       ORDER.urgentBefore = checked;
@@ -791,6 +887,12 @@ myApp.controllers = {
       myApp.controllers.affichage.updateLists();
     },
 
+    /**
+     * Application d'un ordre de tri
+     * @param order ordre de tri à appliquer (par défaut : ordre de création)
+     * @param croissant sens (par défaut : le sens courant)
+     * @param urgentBefore placer les tâches urgentes avant (par défaut : la règle courante)
+     */
     set: (order = ORDER_CREATION, croissant = ORDER.croissant, urgentBefore = ORDER.urgentBefore) => {
       ORDER.type = order;
       ORDER.croissant = croissant;
