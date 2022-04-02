@@ -11,6 +11,7 @@ Je n'ai pas réalisé les fonctionnalités en fonction du sujet, mais plus sur c
 
 * Obligatoires :
   * O2 : Mettre son nom sur une page | [Voir dans le code](https://github.com/ActxLeToucan/toucdolist/blob/master/www/html/menu.html#L63)
+  * O3 : Ajouter une icone personnalisée | [Voir dans le code](https://github.com/ActxLeToucan/toucdolist/blob/master/config.xml#L11)
 * Prioritaires :
   * P1 : Persistance des données | [En savoir plus](#stockage) | [Voir dans le code](https://github.com/ActxLeToucan/toucdolist/blob/master/www/js/services.js#L729)
   * P2 : Ajouter un état "en cours" | [En savoir plus](#ma-journée) | [Voir dans le code](https://github.com/ActxLeToucan/toucdolist/blob/master/www/js/services.js#L414)
